@@ -6,3 +6,6 @@ this is our fullstack group project,  we are planning and having team  discussio
 
 # we have setup project folder, made venv, activate venv
 # solved conflicts 
+
+
+# third collaborator is added , this is just a refrece we will add detail documentation later on this file , thanks 
