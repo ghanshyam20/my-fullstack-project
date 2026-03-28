@@ -4,4 +4,5 @@ this is our fullstack group project,  we are planning and having team  discussio
 
 
 
-# we have setup project folder, made venv, activate venv 
+# we have setup project folder, made venv, activate venv
+# solved conflicts 
