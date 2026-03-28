@@ -3,3 +3,5 @@ this is our fullstack group project,  we are planning and having team  discussio
  so many ideas and in head , so it might be difficult to actual implementstation but we will do it soon.
 
 
+
+# we have setup project folder, made venv, activate venv 
