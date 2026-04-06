@@ -7,5 +7,14 @@
 </head>
 <body>
     <h1> this is register page </h1>
+    <form method="POST" autocomplete="off">
+
+
+        {% csrf_token %}
+
+        {{RegisterForm.as_p}}
+
+        <input type="submit" value="Submit">
+    </form>
 </body>
 </html>
