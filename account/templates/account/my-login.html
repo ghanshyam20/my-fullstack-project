@@ -8,8 +8,9 @@
 <body>
     <h1>login</h1>
 
-    {% csrf_token %}
+    
     <form method="post">
+        {% csrf_token %}
         {{ LoginForm.as_p }}
         <button type="submit">Login</button>
     </form>
