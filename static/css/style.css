@@ -1,3 +1,9 @@
 body{
-    background-color: aqua;
+    background-color: #f0f0f0;
+}
+
+
+.form-layout{
+    width: 500px;
+    border-radius:20px;
 }
