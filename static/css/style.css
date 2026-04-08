@@ -1,9 +1,30 @@
-body{
-    background-color: #f0f0f0;
+/* this css is for globlly works */
+
+
+
+body {
+  background-color: #f8f9fa;
 }
 
+.form-layout {
+  width: 500px;
+  border-radius: 20px;
+}
 
-.form-layout{
-    width: 500px;
-    border-radius:20px;
+/* hero  */
+.hero {
+  max-width: 700px;
+  margin: 100px auto;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 42px;
+  font-weight: bold;
+}
+
+.hero p {
+  font-size: 18px;
+  color: #555;
+  margin-top: 15px;
 }

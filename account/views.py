@@ -5,7 +5,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
 
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 
 
@@ -48,12 +48,12 @@ def my_login(request):
             user=authenticate(request,username=username,password=password)
             if user is not None and user.is_writer==True:
                 login(request,user)
-                return HttpResponse('Welcome Writer')
+                return redirect('writer-dashboard')
             
 
             if user is not None  and user.is_writer==False:
                 login(request,user)
-                return HttpResponse('Welcome Reader')
+                return redirect('client-dashboard')
             
     context={'LoginForm':form}
             
@@ -63,6 +63,16 @@ def my_login(request):
           
 
     return render(request,'account/my-login.html',context)
+
+
+
+
+def user_logout(request):
+    logout(request)
+    return redirect("my-login")
+
+
+
 
 
 
