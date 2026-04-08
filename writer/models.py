@@ -1,6 +1,8 @@
 from django.db import models
 from account.models import CustomUser
 
+
+
 # for the Article 
 
 

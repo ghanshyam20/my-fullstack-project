@@ -1,8 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from  .forms import ArticleForm
 from django.http import HttpResponse
+
+from .models import Article
 
 # this is for writer logic
 
@@ -26,7 +28,7 @@ def create_article(request):
             article.user=request.user
 
             article.save()
-            return HttpResponse('Article created!')
+            return redirect('my-articles')
         
 
     context={'CreateArticleForm':form}
@@ -36,6 +38,22 @@ def create_article(request):
 
 
 
+
+@login_required(login_url='my-login')
+
+
+def my_articles(request):
+
+    current_user=request.user.id
+    article=Article.objects.all().filter(user=current_user)
+
+    context={'AllArticles':article}
+
+
+    return render(request,'writer/my-articles.html',context)
+
+
+    
         
 
     
