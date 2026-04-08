@@ -1,0 +1,42 @@
+
+/* i have created seprate css file for each html to make it clean and seperate*/
+
+
+
+/* navbar container */
+.custom-navbar {
+  border-bottom: 1px solid #eee;
+  padding: 12px 0;
+}
+
+/* right side container */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* links */
+.navbar-link {
+  color: #333;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.navbar-link:hover {
+  color: #000;
+}
+
+/* logout */
+.logout-link {
+  color: #dc3545;
+}
+
+.logout-link:hover {
+  color: #a71d2a;
+}
+
+/* buttons */
+.navbar .btn {
+  padding: 6px 14px;
+}
