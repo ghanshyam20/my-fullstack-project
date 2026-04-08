@@ -56,7 +56,16 @@ def my_articles(request):
 
 @login_required(login_url='my-login')
 def update_article(request,pk):
-    article=Article.objects.get(id=pk)
+
+
+# to secure , relevant user associated with that article only allowed to update
+    try:
+
+
+        article=Article.objects.get(id=pk,user=request.user)
+
+    except:
+        return redirect('my-articles')
 
     form=ArticleForm(instance=article)
 
@@ -67,7 +76,7 @@ def update_article(request,pk):
         if form.is_valid:
             form.save()
 
-            return redirect('my-articles')
+            
         
 
     context={'UpdateArticleForm':form}
