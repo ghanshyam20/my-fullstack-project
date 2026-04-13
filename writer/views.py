@@ -73,8 +73,10 @@ def update_article(request,pk):
         form=ArticleForm(request.POST,instance=article)
 
 
-        if form.is_valid:
+        if form.is_valid():
             form.save()
+
+            return redirect('my-articles')
 
             
         

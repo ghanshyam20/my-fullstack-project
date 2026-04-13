@@ -18,15 +18,13 @@
 
     <br> <br>
 
-    <a href="{% url 'update-article' article.id %}"> Update article</a>
+    <a href="{% url 'update-article' article.id %}"class="btn btn-sm btn-outline-primary me-2"> Update article</a>
 
-    <a href="{% url 'delete-article' article.id %}"> Delete article</a>
+    <a href="{% url 'delete-article' article.id %}" class="btn btn-sm btn-outline-danger"> Delete article</a>
  </div>
 
  <br>
 
-
  {% endfor %}
 
-
- {% endblock %}
+ {% endblock content %}
