@@ -3,6 +3,7 @@ from django.shortcuts import render , redirect
 from .forms import CreateUserForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 
 from django.contrib.auth import authenticate, login, logout
@@ -70,6 +71,13 @@ def my_login(request):
 def user_logout(request):
     logout(request)
     return redirect("my-login")
+
+
+@login_required(login_url='my-login')
+def account_management(request):
+
+
+    return render(request,'account/account-management.html')
 
 
 

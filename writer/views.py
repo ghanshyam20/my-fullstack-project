@@ -111,10 +111,7 @@ def delete_article(request,pk):
     return render(request,'writer/delete-article.html' )
 
 
-@login_required(login_url='my-login')
-def account_management(request):
 
-    return render(request,'writer/account-management.html')
 
         
 
