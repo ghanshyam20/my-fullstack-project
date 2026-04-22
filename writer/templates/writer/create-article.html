@@ -1,38 +1,53 @@
- {% extends 'writer/navbar.html' %}
-
-
- {% load crispy_forms_tags %}
+{% extends 'writer/navbar.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
- 
- <br> 
 
+<h4 class="mb-4">Create Article</h4>
 
- <div class="container bg-white shadow-md p-5 form-layout">
+<div class="row">
+    <div class="col-md-8">
 
-    <h3>Create an Article</h3>
-    <p>You can create an article below:</p>
-    <br>
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
 
-    <form method="POST" autocomplete="off">
+                <h5 class="mb-3">Write your article</h5>
 
-         {% csrf_token %}
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
 
-         {{ CreateArticleForm|crispy }}
+                   
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        {{ CreateArticleForm.title }}
+                    </div>
 
-         <input  class="btn btn-success"type="submit" value="Create Article"/>
+                   
+                    <div class="mb-3">
+                        <label class="form-label">Content</label>
+                        {{ CreateArticleForm.content }}
+                    </div>
 
-    </form>
+                   
+                    <div class="form-check mb-3">
+                        {{ CreateArticleForm.is_premium }}
+                        <label class="form-check-label">Premium Article</label>
+                    </div>
 
- </div>
+              
+                    <div class="mb-3">
+                        <label class="form-label">Upload Images</label>
+                        <input type="file" name="images" class="form-control" multiple>
+                    </div>
 
+                    <button class="btn btn-success">Publish Article</button>
 
- 
+                </form>
 
+            </div>
+        </div>
 
+    </div>
+</div>
 
-
-
- {% endblock %}
-
-
+{% endblock %}

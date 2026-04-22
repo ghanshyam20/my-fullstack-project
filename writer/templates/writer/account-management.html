@@ -1,0 +1,89 @@
+{% extends 'writer/navbar.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<h4 class="mb-4">Account Settings</h4>
+
+<div class="row">
+    <div class="col-md-6">
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h6 class="mb-3">Account Details</h6>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ UpdateUserForm|crispy }}
+
+                    <button name="update_profile" class="btn btn-success w-100 mt-2">
+                        Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4 text-center">
+
+                <h6 class="mb-3">Profile</h6>
+
+                <img src="{{ request.user.profile.profile_picture.url }}"
+                     class="rounded-circle mb-3"
+                     width="80" height="80">
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <input type="file" name="profile_picture" class="form-control mb-2">
+
+                    <textarea name="bio" class="form-control" placeholder="Bio">{{ request.user.profile.bio }}</textarea>
+
+                    <button name="update_profile_extra" class="btn btn-dark w-100 mt-2">
+                        Update Profile
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6">
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h6 class="mb-3">Change Password</h6>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ PasswordForm|crispy }}
+
+                    <button name="change_password" class="btn btn-warning w-100 mt-2">
+                        Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4 text-center">
+            <div class="card-body p-4">
+                <h6 class="mb-3">Subscription</h6>
+
+                {% if subscription %}
+                    <p>{{ subscription.plan }}</p>
+                    <p>Expires: {{ subscription.expires_at }}</p>
+                    <a href="#" class="btn btn-danger w-100">Cancel</a>
+                {% else %}
+                    <p>Free Plan</p>
+                    <a href="#" class="btn btn-success w-100">Upgrade</a>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -73,11 +73,6 @@ def user_logout(request):
     return redirect("my-login")
 
 
-@login_required(login_url='my-login')
-def account_management(request):
-
-
-    return render(request,'account/account-management.html')
 
 
 
