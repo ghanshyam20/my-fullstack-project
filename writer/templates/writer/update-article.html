@@ -1,38 +1,118 @@
- {% extends 'writer/navbar.html' %}
-
-
- {% load crispy_forms_tags %}
+{% extends 'writer/navbar.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
 
 {% block content %}
- 
- <br> 
+
+<div class="container py-4">
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+
+      <h4 class="fw-bold mb-1">Update Article</h4>
+      <p class="text-muted mb-4">Edit content and manage images</p>
+
+      <!-- MAIN FORM -->
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ UpdateArticleForm|crispy }}
+
+        <!-- CURRENT IMAGES -->
+        <hr class="my-4">
+        <h6 class="fw-semibold mb-3">Current Images</h6>
+
+        <div class="row g-3">
+
+          {% for img in article.images.all %}
+          <div class="col-6 col-md-3">
+
+            <div class="card border-0 shadow-sm">
+
+              <img src="{{ img.image.url }}"
+                   class="card-img-top"
+                   style="height:150px; object-fit:cover; cursor:pointer;"
+                   data-bs-toggle="modal"
+                   data-bs-target="#previewModal{{ img.id }}">
+
+              <div class="card-body p-2">
+
+                <!-- REMOVE BUTTON -->
+                <a href="{% url 'delete-image' img.id %}"
+                   class="btn btn-danger btn-sm w-100">
+                  Remove
+                </a>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- MODAL PREVIEW -->
+          <div class="modal fade" id="previewModal{{ img.id }}" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content bg-dark border-0">
+
+                <div class="modal-body text-center p-2">
+                  <img src="{{ img.image.url }}"
+                       class="img-fluid"
+                       style="max-height:80vh;">
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          {% empty %}
+          <p class="text-muted">No images uploaded.</p>
+          {% endfor %}
+
+        </div>
+
+        <!-- ADD NEW IMAGES -->
+        <hr class="my-4">
+        <h6 class="fw-semibold mb-3">Add New Images</h6>
+
+        <!-- DRAG & DROP -->
+        <div id="drop-area"
+             class="border rounded p-4 text-center bg-light">
+
+          <p class="text-muted mb-2">
+            Drag & drop images here
+          </p>
+
+          <input type="file"
+                 name="images"
+                 id="fileElem"
+                 multiple
+                 hidden>
+
+          <button type="button"
+                  class="btn btn-outline-primary btn-sm"
+                  onclick="document.getElementById('fileElem').click()">
+            Choose Files
+          </button>
+
+        </div>
+
+        <!-- SUBMIT -->
+        <div class="mt-4">
+          <button type="submit" class="btn btn-success">
+            Update Article
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- DRAG DROP SCRIPT -->
 
 
- <div class="container bg-white shadow-md p-5 form-layout">
-
-    <h3>Update  an Article</h3>
-    <p>You can update an article below:</p>
-    <br>
-
-    <form method="POST" autocomplete="off">
-
-         {% csrf_token %}
-
-         {{ UpdateArticleForm|crispy }}
-
-         <input  class="btn btn-success" type="submit" value="Update Article"/>
-
-    </form>
-
- </div>
 
 
- 
-
-
-
-
-
- {% endblock %}
-
-
+{% endblock %}

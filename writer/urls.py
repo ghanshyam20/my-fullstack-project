@@ -10,6 +10,7 @@ urlpatterns=[
     path('my-articles',views.my_articles,name="my-articles"),
     path('update-article/<str:pk>',views.update_article,name='update-article'),
     path('delete-article/<str:pk>',views.delete_article,name='delete-article'),
+    path('delete-image/<int:pk>/', views.delete_image, name='delete-image'),
     path('account-management',views.account_management,name='account-management'),
 
 ]
