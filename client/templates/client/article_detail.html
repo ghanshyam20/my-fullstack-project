@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }}</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'client/css/article.css' %}">
+</head>
+
+<body class="bg-light">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-dark bg-dark px-4 py-2 shadow-sm">
+    <div class="container-fluid">
+        <span class="navbar-brand fw-semibold">InsightHub</span>
+        <a href="{% url 'client-dashboard' %}" class="btn btn-outline-light btn-sm">Back</a>
+    </div>
+</nav>
+
+<!-- MAIN -->
+<main class="container py-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+
+            <!-- ARTICLE -->
+            <article class="card border-0 shadow-sm">
+
+                <!-- HERO IMAGE -->
+                {% if article.images.first %}
+                <img src="{{ article.images.first.image.url }}"
+                     class="card-img-top hero-img clickable-img"
+                     data-bs-toggle="modal"
+                     data-bs-target="#imageModal"
+                     onclick="openImage(this)"
+                     alt="">
+                {% endif %}
+
+                <div class="card-body p-4 p-md-5">
+
+                    <!-- CATEGORY -->
+                    <span class="badge bg-secondary mb-3 text-uppercase small">
+                        Article
+                    </span>
+
+                    <!-- TITLE -->
+                    <h1 class="article-title fw-bold mb-2">
+                        {{ article.title }}
+                    </h1>
+
+                    <!-- META -->
+                    <p class="text-muted small mb-4">
+                        {{ article.date_posted|date:"F j, Y · g:i a" }}
+                    </p>
+
+                    <!-- CONTENT -->
+                    <div class="article-content mb-4">
+                        {{ article.content }}
+                    </div>
+
+                    <!-- IMAGE GRID -->
+                    {% with rest=article.images.all|slice:"1:" %}
+                    {% if rest %}
+                    <div class="row g-3 mb-4">
+                        {% for img in rest %}
+                        <div class="col-md-6">
+                            <div class="image-box">
+                                <img src="{{ img.image.url }}"
+                                class="clickable-img"
+                                data-bs-toggle="modal"
+                                data-bs-target="#imageModal"
+                                onclick="openImage(this)"
+                                alt="">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    <!-- ACTION BAR -->
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3 flex-wrap gap-2">
+
+                        <div class="d-flex gap-2">
+
+                            <button class="btn btn-outline-primary btn-sm">
+                                👍 Like
+                            </button>
+
+                            <button class="btn btn-outline-secondary btn-sm">
+                                💬 Comment
+                            </button>
+
+                            <button class="btn btn-outline-warning btn-sm">
+                                🔖 Bookmark
+                            </button>
+
+                        </div>
+
+                        <a href="#" class="btn btn-outline-danger btn-sm">
+                            🚩 Report
+                        </a>
+
+                    </div>
+
+                </div>
+            </article>
+
+        </div>
+    </div>
+
+</main>
+
+<!-- IMAGE MODAL -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark border-0">
+
+      <div class="modal-body p-0">
+        <img id="modalImage" src="" class="img-fluid w-100">
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="{% static 'client/js/article.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

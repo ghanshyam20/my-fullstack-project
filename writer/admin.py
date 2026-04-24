@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, ArticleImage
+from .models import Article, ArticleImage, Category, Tag, ArticleTag
 
 
 class ArticleImageInline(admin.TabularInline):  # or StackedInline
@@ -12,3 +12,7 @@ class ArticleAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Article, ArticleAdmin)
+admin.site.register(Category)
+admin.site.register(Tag)
+admin.site.register(ArticleTag)
+admin.site.register(ArticleImage)
