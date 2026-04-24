@@ -68,7 +68,7 @@ def update_article(request, pk):
                 for file in files:
                     ArticleImage.objects.create(article=article, image=file)
 
-            return redirect('update-article', pk=article.id)
+            return redirect('my-articles')
 
     else:
         form = ArticleForm(instance=article)
