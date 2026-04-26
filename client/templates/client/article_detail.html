@@ -3,167 +3,90 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ article.title }}</title>
 
-    <!-- Bootstrap -->
+   
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
 
-    <!-- Fonts -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Lora&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Custom CSS -->
+    
     <link rel="stylesheet" href="{% static 'client/css/article.css' %}" />
   </head>
 
   <body class="bg-light">
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-dark bg-dark px-4 py-2 shadow-sm">
-      <div class="container-fluid">
-        <span class="navbar-brand fw-semibold">InsightHub</span>
-        <a
-          href="{% url 'client-dashboard' %}"
-          class="btn btn-outline-light btn-sm"
-          >Back</a
-        >
-      </div>
-    </nav>
-
-    <!-- MAIN -->
     <main class="container py-5">
       <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
-          <!-- ARTICLE -->
-          <article class="card border-0 shadow-sm">
-            <!-- HERO IMAGE -->
+          <article class="card shadow-sm">
+            
             {% if article.images.first %}
             <img
               src="{{ article.images.first.image.url }}"
-              class="card-img-top hero-img clickable-img"
-              data-bs-toggle="modal"
-              data-bs-target="#imageModal"
-              onclick="openImage(this)"
-              alt=""
+              class="hero-img clickable-img"
+              data-img="{{ article.images.first.image.url }}"
             />
             {% endif %}
 
-            <div class="card-body p-4 p-md-5">
-              <!-- CATEGORY -->
-              <span class="badge bg-secondary mb-3 text-uppercase small">
-                Article
-              </span>
+            <div class="card-body">
+              
+              {% if messages %} {% for message in messages %}
+              <div
+                class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3"
+              >
+                {{ message }}
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                ></button>
+              </div>
+              {% endfor %} {% endif %}
 
-              <!-- TITLE -->
-              <h1 class="article-title fw-bold mb-2">{{ article.title }}</h1>
+     
+              <h2>{{ article.title }}</h2>
 
-              <!-- META -->
-              <p class="text-muted small mb-4">
+              <p class="text-muted">
                 {{ article.date_posted|date:"F j, Y · g:i a" }}
               </p>
 
-              <!-- CONTENT -->
-              <div class="article-content mb-4">{{ article.content }}</div>
+           
+              <div class="mb-3">{{ article.content }}</div>
 
-              <!-- IMAGE GRID -->
-              {% with rest=article.images.all|slice:"1:" %} {% if rest %}
-              <div class="row g-3 mb-4">
-                {% for img in rest %}
-                <div class="col-md-6">
-                  <div class="image-box">
-                    <img
-                      src="{{ img.image.url }}"
-                      class="clickable-img"
-                      data-bs-toggle="modal"
-                      data-bs-target="#imageModal"
-                      onclick="openImage(this)"
-                      alt=""
-                    />
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-              {% endif %} {% endwith %}
-
-              <!-- ACTION BAR -->
-              <div
-                class="d-flex justify-content-between align-items-center border-top pt-3 flex-wrap gap-2"
-              >
-                <div class="d-flex gap-2">
-                  <button
-                    class="btn btn-outline-primary btn-sm"
-                    id="like-btn"
-                    data-url="{% url 'toggle-like' article.id %}"
-                    onclick="toggleLike()"
-                  >
-                    👍 Like(<span id="like-count">
-                      {{article.like_set.count}}
-                    </span>
-                    )
-                  </button>
-
-                  <button
-                    class="btn btn-outline-secondary btn-sm"
-                    onclick="scrollToComments()"
-                  >
-                    💬 Comment
-                  </button>
-
-                  <button
-                    class="btn btn-outline-warning btn-sm"
-                    {% if is_bookmarked %}
-                      style="background-color: #ffc107; border-color: #ffc107;"
-                    {% endif %}
-                    id="bookmark-btn"
-                    data-url="{% url 'toggle-bookmark' article.id %}"
-                    onclick="toggleBookmark()"
-                  >
-                    🔖 Bookmark (
-                    <span id="bookmark-count">
-                      {{ article.bookmark_set.count }}
-                    </span>
-                    )
-                  </button>
-                </div>
+     
+              <div class="d-flex gap-2 flex-wrap">
+             
+                <button
+                  id="like-btn"
+                  class="btn btn-outline-primary btn-sm"
+                  data-url="{% url 'toggle-like' article.id %}"
+                >
+                  👍 Like (<span id="like-count"
+                    >{{ article.like_set.count }}</span
+                  >)
+                </button>
 
                 
-               <div class="modal fade" id="reportModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
+                <button
+                  id="comment-toggle"
+                  class="btn btn-outline-secondary btn-sm"
+                >
+                  💬 Comment
+                </button>
 
-      <div class="modal-header">
-        <h5 class="modal-title">Report Article</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+                
+                <button
+                  id="bookmark-btn"
+                  data-url="{% url 'toggle-bookmark' article.id %}"
+                  class="btn btn-sm {% if is_bookmarked %}btn-warning text-dark{% else %}btn-outline-warning{% endif %}"
+                >
+                  🔖 Bookmark (<span id="bookmark-count"
+                    >{{ article.bookmark_set.count }}</span
+                  >)
+                </button>
 
-      <div class="modal-body">
-
-        <textarea id="report-reason"
-                  class="form-control"
-                  rows="3"
-                  placeholder="Why are you reporting this?"
-                  required></textarea>
-
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-
-        <button class="btn btn-danger"
-                onclick="submitReport({{ article.id }})">
-            Submit Report
-        </button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
+            
                 <button
                   class="btn btn-outline-danger btn-sm"
                   data-bs-toggle="modal"
@@ -173,44 +96,82 @@
                 </button>
               </div>
 
-              <hr class="my-4" />
+              <hr />
 
-              <h5 id="comment-section" class="fw-bold mb-3">Comments</h5>
+              
+              <div id="comment-box" class="d-none">
+                <h6 class="mb-3">Comments</h6>
 
-              <form method="POST" action="{% url 'add-comment' article.id %}">
-                {% csrf_token %}
+        
+                <div id="comment-list">
+                  {% for comment in comments %}
+                  <div
+                    class="border rounded p-2 mb-2"
+                    id="comment-{{ comment.id }}"
+                  >
+                    <div class="d-flex justify-content-between">
+                      <strong>
+                        {{ comment.user.first_name|default:comment.user.email }}
+                      </strong>
 
-                <div class="mb-3">
+                      {% if comment.user == request.user %}
+                      <div class="d-flex gap-2">
+                        
+                        <button
+                          class="btn btn-sm btn-link p-0 edit-btn"
+                          data-id="{{ comment.id }}"
+                          data-content="{{ comment.content }}"
+                        >
+                          Edit
+                        </button>
+
+                    
+                        <a
+                          href="{% url 'delete-comment' comment.id %}"
+                          class="text-danger small"
+                        >
+                          Delete
+                        </a>
+                      </div>
+                      {% endif %}
+                    </div>
+
+                
+                    <p class="mb-1 comment-text">{{ comment.content }}</p>
+
+                    
+                    <div class="edit-box d-none mt-2">
+                      <textarea class="form-control mb-2 edit-input"></textarea>
+
+                      <button
+                        class="btn btn-sm btn-success save-edit"
+                        data-id="{{ comment.id }}"
+                      >
+                        Save
+                      </button>
+
+                      <button class="btn btn-sm btn-secondary cancel-edit">
+                        Cancel
+                      </button>
+                    </div>
+
+                    <small class="text-muted">{{ comment.date_posted }}</small>
+                  </div>
+                  {% endfor %}
+                </div>
+
+              
+                <form method="POST" action="{% url 'add-comment' article.id %}">
+                  {% csrf_token %}
                   <textarea
                     name="content"
-                    class="form-control"
-                    rows="3"
-                    placeholder="Write your comment..."
+                    class="form-control mb-2"
+                    placeholder="Write a comment..."
                     required
-                  >
-                  </textarea>
-                </div>
+                  ></textarea>
 
-                <button class="btn btn-primary btn-sm">Post Comment</button>
-              </form>
-
-              <div class="mt-4">
-                {% for comment in comments %}
-
-                <div class="border rounded p-3 mb-2 bg-light">
-                  <div class="d-flex justify-content-between">
-                    <strong>{{ comment.user.first_name }}</strong>
-                    <small class="text-muted">
-                      {{ comment.date_posted|timesince }} ago
-                    </small>
-                  </div>
-
-                  <p class="mb-0 mt-2">{{ comment.content }}</p>
-                </div>
-
-                {% empty %}
-                <p class="text-muted">No comments yet.</p>
-                {% endfor %}
+                  <button class="btn btn-primary btn-sm">Post</button>
+                </form>
               </div>
             </div>
           </article>
@@ -218,49 +179,41 @@
       </div>
     </main>
 
-    <!-- IMAGE MODAL -->
-    <div class="modal fade" id="imageModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content bg-dark border-0">
-          <div class="modal-body p-0">
-            <img id="modalImage" src="" class="img-fluid w-100" />
-          </div>
+    
+    <div class="modal fade" id="imageModal">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <img id="modalImage" class="w-100" />
         </div>
       </div>
     </div>
 
+    
+    <div class="modal fade" id="reportModal">
+      <div class="modal-dialog">
+        <div class="modal-content p-3">
+          <h5>Report Article</h5>
 
-    <div class="modal fade" id="reportModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
+          <label class="form-label">Why are you reporting this?</label>
 
-      <div class="modal-header">
-        <h5 class="modal-title">Report Article</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+          <textarea
+            id="report-reason"
+            class="form-control mb-2"
+            placeholder="Spam, abusive content, etc..."
+          ></textarea>
 
-      <div class="modal-body">
-
-        <textarea id="report-reason"
-                  class="form-control"
-                  rows="3"
-                  placeholder="Why are you reporting this?"
-                  required></textarea>
-
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-
-        <button class="btn btn-danger"
-                onclick="submitReport({{ article.id }})">
+          <button id="submit-report" class="btn btn-danger">
             Submit Report
-        </button>
+          </button>
+        </div>
       </div>
-
     </div>
-  </div>
-</div>
+
+  
+    <script>
+      const ARTICLE_ID = {{ article.id }};
+    </script>
+
     <script src="{% static 'client/js/article.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
