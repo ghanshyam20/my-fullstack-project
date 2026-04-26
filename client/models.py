@@ -51,8 +51,7 @@ class Comment(models.Model):
     date_posted = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.user.email}"
-    
+        return f"Comment by {self.user.email} - {self.article.title}"
 
 
 class Like(models.Model):
@@ -109,6 +108,9 @@ class Report(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     reason = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'article')
 
 
     def __str__(self):
