@@ -1,83 +1,172 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
   <title>InsightHub</title>
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
-  <link rel="stylesheet" href="{% static 'css/navbar.css'%}">
-  <link rel="stylesheet" href="{% static 'css/client.css'%}">
-  
-  
-  
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    
+  <link rel="stylesheet" href="{% static 'account/css/index.css' %}">
 </head>
 
-<body>
+<body class="bg-light">
 
-<nav class="navbar navbar-expand-lg bg-white px-4">
-  
-  <a class="navbar-brand fw-bold" href="/">
-    InsightHub
-  </a>
 
-  <div class="ms-auto d-flex align-items-center gap-3">
-    <a href="{% url 'register' %}" class="btn btn-outline-dark me-2">Register</a>
-    <a href="{% url 'my-login' %}" class="btn btn-dark">Login</a>
+<nav class="navbar navbar-expand-lg bg-white border-bottom">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">InsightHub</a>
+
+    <div class="ms-auto">
+      <a href="{% url 'register' %}" class="btn btn-outline-dark btn-sm me-2">Register</a>
+      <a href="{% url 'my-login' %}" class="btn btn-dark btn-sm">Login</a>
+    </div>
   </div>
-
 </nav>
 
 
-<div class="hero">
+<section class="container py-5">
+  <div class="row align-items-center g-5">
 
-  <h1>Read. Learn. Grow.</h1>
+    <div class="col-lg-6 reveal">
+      <h1 class="fw-bold mb-3 display-6">Read. Learn. Grow.</h1>
 
-  <p>
-    Access high-quality articles, tutorials, and premium content created by real writers.
-  </p>
+      <p class="text-muted fs-6">
+        Free and premium tech articles written by real developers.
+      </p>
 
-  <a href="{% url 'register' %}" class="btn btn-success btn-lg mt-4 btn-main">
-    Start Reading →
-  </a>
+      <div class="mt-4 d-flex gap-2 flex-wrap">
+        <a href="{% url 'register' %}" class="btn btn-success btn-main">
+          Start Reading →
+        </a>
 
-</div>
-
-
-
-<div class="container text-center mt-5">
-
-  <div class="row">
-
-    <div class="col-md-4">
-      <h5> Curated Content</h5>
-      <p>Carefully written articles for learning and growth.</p>
+        <a href="#" class="btn btn-outline-secondary btn-main">
+          Become a Writer
+        </a>
+      </div>
     </div>
 
-    <div class="col-md-4">
-      <h5> Premium Access</h5>
-      <p>Subscribe to unlock exclusive content.</p>
-    </div>
+    <div class="col-lg-6 reveal">
+      <div class="card shadow-sm main-card">
+        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c"
+             class="card-img-top">
 
-    <div class="col-md-4">
-      <h5> Writers Platform</h5>
-      <p>Writers can create and manage their own articles.</p>
+        <div class="card-body">
+          <h6 class="fw-bold">How to build Django apps</h6>
+          <p class="text-muted small">Real-world Django guide...</p>
+          <span class="badge bg-warning text-dark">Premium</span>
+        </div>
+      </div>
     </div>
 
   </div>
+</section>
 
-</div>
+<section class="container py-5">
+  <h5 class="text-center fw-semibold mb-5">Why InsightHub</h5>
+
+  <div class="row g-4 text-center">
+
+    <div class="col-md-4 reveal">
+      <div class="feature-box p-4 bg-white rounded shadow-sm h-100">
+        <i class="bi bi-journal-text fs-2 text-primary"></i>
+        <h6 class="fw-semibold mt-2">Curated Content</h6>
+        <p class="text-muted small">High-quality articles</p>
+
+        <div class="feature-extra">
+          Carefully selected tutorials written by experienced developers to help you learn faster.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 reveal">
+      <div class="feature-box p-4 bg-white rounded shadow-sm h-100">
+        <i class="bi bi-lock fs-2 text-warning"></i>
+        <h6 class="fw-semibold mt-2">Premium Access</h6>
+        <p class="text-muted small">Unlock everything</p>
+
+        <div class="feature-extra">
+          Go deeper with advanced content, real-world projects, and structured learning paths.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 reveal">
+      <div class="feature-box p-4 bg-white rounded shadow-sm h-100">
+        <i class="bi bi-pencil-square fs-2 text-success"></i>
+        <h6 class="fw-semibold mt-2">Writers Platform</h6>
+        <p class="text-muted small">Create & manage articles</p>
+
+        <div class="feature-extra">
+          Share your knowledge, build your portfolio, and reach a global audience.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
 
 
-<div class="text-center mt-5 mb-3 text-muted">
-  <small>Built with Django • Subscription-based content platform</small>
-</div>
+<section class="container py-5 text-center">
+  <h5 class="fw-semibold mb-5 reveal">How it works</h5>
+
+  <div class="row g-4">
+
+    <div class="col-md-4 reveal">
+      <div class="step-box">
+        <h6 class="fw-semibold">1. Explore</h6>
+        <p class="text-muted small">Browse articles</p>
+      </div>
+    </div>
+
+    <div class="col-md-4 reveal">
+      <div class="step-box">
+        <h6 class="fw-semibold">2. Unlock</h6>
+        <p class="text-muted small">Access premium</p>
+      </div>
+    </div>
+
+    <div class="col-md-4 reveal">
+      <div class="step-box">
+        <h6 class="fw-semibold">3. Contribute</h6>
+        <p class="text-muted small">Become writer</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<footer class="bg-white border-top mt-5">
+  <div class="container py-5 text-center">
+
+    <h6 class="fw-semibold mb-2">InsightHub</h6>
+    <p class="text-muted small mb-3">Learn & grow with tech content</p>
+
+    <div class="footer-links mb-3">
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <a href="#">Privacy</a>
+    </div>
+
+    <div class="footer-social mb-3">
+      <a href="#"><i class="bi bi-github"></i></a>
+      <a href="#"><i class="bi bi-linkedin"></i></a>
+      <a href="#"><i class="bi bi-twitter"></i></a>
+    </div>
+
+    <div class="small text-muted">© 2026 InsightHub</div>
+
+  </div>
+</footer>
+
+<script src="{% static 'account/js/index.js' %}"></script>
 
 </body>
 </html>
