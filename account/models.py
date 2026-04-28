@@ -17,7 +17,8 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     date_joined=models.DateTimeField(default=timezone.now)
 
 
-    is_writer=models.BooleanField(default=False, verbose_name="Are you a writer?")
+    consent_given=models.BooleanField(default=False) # models for consent by default it is fasle unless user hit the content buton
+    is_writer=models.BooleanField(default=False)
 
 
     USERNAME_FIELD='email'
@@ -30,6 +31,27 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
         return self.email
 
 
+
+
+
+
+class EmailOtp(models.Model):
+    user=models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    otp=models.CharField(max_length=6)
+    created_at=models.DateTimeField(auto_now_add=True)
+
+
+    def is_valid(self):
+
+        return timezone.now() < self.created_at + timezone.timedelta(minutes=10)
+    
+
+
+
+
+
+
+
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
@@ -37,3 +59,11 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.email} Profile"
+    
+
+
+
+
+    
+
+    
