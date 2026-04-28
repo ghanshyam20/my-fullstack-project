@@ -18,7 +18,9 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
 
 
     consent_given=models.BooleanField(default=False) # models for consent by default it is fasle unless user hit the content buton
+    consent_timestamp=models.DateTimeField(auto_now_add=True)
     is_writer=models.BooleanField(default=False)
+
 
 
     USERNAME_FIELD='email'

@@ -127,6 +127,14 @@ def user_logout(request):
 
 
 
+def terms(request):
+    return render(request, 'account/terms.html')
+
+def privacy(request):
+    return render(request, 'account/privacy.html')
+
+
+
 
 
 
