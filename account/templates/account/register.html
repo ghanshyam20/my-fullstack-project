@@ -47,10 +47,23 @@
                 {% csrf_token %}
 
             
-                {{ RegisterForm|crispy }}
+            {{ RegisterForm.first_name|as_crispy_field }}
+            {{ RegisterForm.last_name|as_crispy_field }}
+            {{ RegisterForm.email|as_crispy_field }}
+            {{ RegisterForm.password1|as_crispy_field }}
+            {{ RegisterForm.password2|as_crispy_field }}
 
                 
-               
+        <div class="form-check mt-3">
+        <input class="form-check-input" type="checkbox" name="consent_given" required>
+        <label class="form-check-label">
+            I agree to the 
+            <a href="{% url 'terms' %}">Terms</a> and 
+            <a href="{% url 'privacy' %}">Privacy Policy</a>
+        </label>
+        </div>
+
+    <div class="d-grid mt-4">
                 
                 <div class="d-grid mt-4">
                     <button class="btn btn-success btn-lg btn-main">

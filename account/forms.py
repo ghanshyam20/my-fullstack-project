@@ -7,7 +7,8 @@ from .models import CustomUser
 
 
 class CreateUserForm(UserCreationForm):
-    consent=forms.BooleanField(required=True)
+    consent_given=forms.BooleanField(required=True,
+                                     label="I agree to the Terms and Privacy Policy")
     
     class Meta:
 
