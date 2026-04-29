@@ -195,3 +195,5 @@ def report_article(request, article_id):
         return JsonResponse({
             'status': 'reported'
         })
+    
+
