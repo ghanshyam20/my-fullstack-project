@@ -12,6 +12,7 @@ from django.contrib import messages
 from .forms import CreateUserForm, LoginForm
 from .models import EmailOtp, CustomUser
 from writer.models import Article
+from django.contrib.messages import get_messages
 
 
 def home(request):
@@ -308,3 +309,136 @@ def apply_writer(request):
 @login_required(login_url='my-login')
 def writer_pending(request):
     return render(request, 'account/writer_pending.html')
+
+
+def forgot_password(request):
+    storage=get_messages(request)
+    for _ in storage:
+        pass
+    if request.method == "POST":
+        email = request.POST.get("email")
+        user = CustomUser.objects.filter(email=email).first()
+
+        if user:
+            otp_obj = EmailOtp.objects.filter(user=user).first()
+
+            if otp_obj and otp_obj.is_valid():
+                otp_code = otp_obj.otp
+            else:
+                otp_code = str(random.randint(100000, 999999))
+                EmailOtp.objects.filter(user=user).delete()
+                EmailOtp.objects.create(user=user, otp=otp_code)
+
+            send_mail(
+                subject="Reset Your Password – InsightHub",
+                message=f"Your OTP is: {otp_code}",
+                from_email=None,
+                recipient_list=[email],
+            )
+
+            return redirect('reset-verify', user_id=user.id)
+
+        messages.success(request, "Check your email for 6-digit code to reset your password.")
+
+    return render(request, 'account/forgot_password.html')
+
+        
+
+
+        
+      
+
+
+
+def reset_password(request, user_id):
+    user = CustomUser.objects.filter(id=user_id).first()
+    if not user:
+        return redirect('forgot-password')
+
+    # 🔒 protect route
+    if request.session.get('reset_verified_user') != user.id:
+        return redirect('forgot-password')
+
+    if request.method == "POST":
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+
+        if password1 != password2:
+            messages.error(request, "Passwords do not match")
+            return redirect('reset-password', user_id=user.id)
+
+        user.set_password(password1)
+        user.save()
+
+        # clear session
+        request.session.pop('reset_verified_user', None)
+
+        send_mail(
+            subject="Your Password Has Been Updated – InsightHub",
+            message=f"Hi {user.first_name},\n\nYour password has been updated successfully.",
+            from_email=None,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+
+        messages.success(request, "Password updated successfully")
+        return redirect('my-login')
+
+    return render(request, 'account/reset_password.html')
+
+
+def verify_reset_otp(request, user_id):
+    user = CustomUser.objects.filter(id=user_id).first()
+    if not user:
+        return redirect('forgot-password')
+
+    otp_obj = EmailOtp.objects.filter(user=user).first()
+
+    if not otp_obj:
+        messages.error(request, "No OTP found.")
+        return redirect('forgot-password')
+    
+    if request.method == 'POST':
+        entered_otp = request.POST.get('otp').strip()
+
+        if otp_obj.otp != entered_otp:
+            messages.error(request, "Invalid OTP. Please try again.")
+
+        elif not otp_obj.is_valid():
+            messages.error(request, "OTP expired. Request a new one.")
+
+        else:
+            otp_obj.delete()
+            request.session['reset_verified_user'] = user.id   # ✅ secure
+            return redirect('reset-password', user_id=user.id)
+
+    return render(request, 'account/verify_reset.html', {'user': user})
+
+
+
+    user = CustomUser.objects.get(id=user_id)
+    otp_obj = EmailOtp.objects.filter(user=user).first()
+
+    if not otp_obj:
+        messages.error(request, "No OTP found.")
+        return redirect('forgot-password')
+    
+
+    if request.method == 'POST':
+
+        entered_otp = request.POST.get('otp').strip()
+
+        if otp_obj.otp != entered_otp:
+            messages.error(request, "Invalid OTP. Please try again.")
+
+        elif not otp_obj.is_valid():
+            messages.error(request, "OTP expired. Request a new one.")
+
+        else:
+            otp_obj.delete()
+            return redirect('reset-password', user_id=user.id)
+
+  
+         
+
+    return render(request, 'account/verify_reset.html', {'user': user})
