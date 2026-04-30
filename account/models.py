@@ -17,7 +17,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     is_staff=models.BooleanField(default=False)
     date_joined=models.DateTimeField(default=timezone.now)
 
-
+    writer_reason = models.TextField()
     consent_given=models.BooleanField(default=False) # models for consent by default it is fasle unless user hit the content buton
     consent_timestamp=models.DateTimeField(auto_now_add=True)
     is_writer=models.BooleanField(default=False)

@@ -1,14 +1,15 @@
 import random
 import json
+
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
-from django.contrib.auth import login, logout
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib import messages
 
-from .forms import CreateUserForm
+from .forms import CreateUserForm, LoginForm
 from .models import EmailOtp, CustomUser
 from writer.models import Article
 
@@ -24,10 +25,10 @@ def register(request):
 
     if request.method=="POST":
 
-        is_writer_request = request.POST.get('writer') == "true"
-    else:
-
-        is_writer_request = request.GET.get('writer') == "true"
+        is_writer_request = (
+            request.POST.get('writer') == "true" or
+            request.POST.get('is_writer') == "true"
+        )
 
     form = CreateUserForm()
 
@@ -35,23 +36,34 @@ def register(request):
         form = CreateUserForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-
+            user.first_name=form.cleaned_data['first_name']
+            user.last_name=form.cleaned_data['last_name']
             user.set_password(form.cleaned_data['password1'])
             user.is_active = False
             user.consent_given = form.cleaned_data['consent_given']
 
             if is_writer_request:
                 user.is_writer_requested = True
+                writer_reason=request.POST.get('writer_reason')
+
+                if not writer_reason:
+                    messages.error(request,"please tell us why you want to be a writer")
+                    return render(request, 'account/register.html', {'RegisterForm': form})
+                user.writer_reason = writer_reason
+
+
+
+            
 
             user.save()
 
             #  for OTP
             otp_code = str(random.randint(100000, 999999))
+            EmailOtp.objects.filter(user=user).delete()
+            EmailOtp.objects.create(user=user, otp=otp_code)
 
-            EmailOtp.objects.update_or_create(
-                user=user,
-                defaults={'otp': otp_code}
-            )
+           
+            
 
             # email message
             if is_writer_request:
@@ -90,14 +102,20 @@ def register(request):
 
 def verify_otp(request, user_id):
     user = CustomUser.objects.get(id=user_id)
-    try:
-        otp_obj = EmailOtp.objects.get(user=user)
-    except EmailOtp.DoesNotExist:
-        messages.error(request,"OTP not found.please register again.")
-        return redirect('register')
 
+    otp_obj = EmailOtp.objects.filter(user=user).first()
+
+    if not otp_obj:
+        messages.error(request, "No OTP found for this user. Please register again.")
+        return redirect('register')
+   
     if request.method == 'POST':
-        entered_otp = request.POST.get('otp')
+        
+        entered_otp = request.POST.get('otp').strip()
+        print("DB OTP:", otp_obj.otp)
+        print("Entered OTP:", entered_otp)
+        print("Match", otp_obj.otp == entered_otp)
+        print("Is Valid:", otp_obj.is_valid())
 
         if otp_obj.otp == entered_otp and otp_obj.is_valid():
             user.is_active = True
@@ -152,6 +170,8 @@ def verify_otp(request, user_id):
             
 
     return render(request, 'account/verify.html', {'user': user})
+   
+
 
 
             
@@ -160,25 +180,30 @@ def verify_otp(request, user_id):
 #  for login 
 
 def my_login(request):
-    form = AuthenticationForm()
-
+    form=LoginForm()
     if request.method == 'POST':
-        form = AuthenticationForm(request=request, data=request.POST)
+        form = LoginForm(request, data=request.POST)
+
 
         if form.is_valid():
-            user = form.get_user()
+            user=form.get_user()
             login(request, user)
 
             if user.is_writer:
                 return redirect('writer-dashboard')
-
+            
             elif user.is_writer_requested:
                 return redirect('writer-pending')
-
+            
             else:
                 return redirect('client-dashboard')
+        else:
+            messages.error(request, "Invalid email or password.")
 
     return render(request, 'account/my-login.html', {'LoginForm': form})
+      
+
+    
 
 
 #  for LOGOUT
@@ -280,6 +305,6 @@ def apply_writer(request):
 
 #  for writer waiting pending page 
 
-
+@login_required(login_url='my-login')
 def writer_pending(request):
     return render(request, 'account/writer_pending.html')
