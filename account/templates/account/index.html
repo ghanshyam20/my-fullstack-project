@@ -168,6 +168,44 @@
   </div>
 </footer>
 
+<div id="cookie-banner" class="cookie-banner">
+
+  <div class="cookie-top">
+
+    <div class="cookie-text">
+      <strong>We use cookies</strong>
+      <p>
+        To improve your experience and understand how the site is used.
+        <a href="{% url 'privacy' %}">Learn more</a>
+      </p>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button id="accept-cookies" class="btn btn-success btn-sm px-3">
+        Accept
+      </button>
+
+      <button id="reject-cookies" class="btn btn-outline-secondary btn-sm px-3">
+        Reject
+      </button>
+    </div>
+
+  </div>
+
+  <div class="cookie-options">
+    <label>
+      <input type="checkbox" checked disabled>
+      Necessary
+    </label>
+
+    <label>
+      <input type="checkbox" id="analytics-toggle">
+      Analytics
+    </label>
+  </div>
+
+</div>
+
 <script src="{% static 'account/js/index.js' %}"></script>
 
 </body>
