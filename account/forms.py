@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 from django  import forms
 
@@ -7,6 +7,9 @@ from .models import CustomUser
 
 
 class CreateUserForm(UserCreationForm):
+    first_name=forms.CharField(required=True)
+    last_name=forms.CharField(required=True)
+
     consent_given=forms.BooleanField(required=True,
                                      label="I agree to the Terms and Privacy Policy")
     
@@ -17,7 +20,8 @@ class CreateUserForm(UserCreationForm):
 
 
         
-
+class LoginForm(AuthenticationForm):
+    username = forms.EmailField(label="Email")
 
 
         

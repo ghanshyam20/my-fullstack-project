@@ -1,0 +1,38 @@
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* card  */
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 12px;
+}
+
+/* input spacing */
+input {
+    padding: 10px !important;
+}
+
+/* eye icon */
+.toggle-password {
+    position: absolute;
+    top: 38px;   
+    right: 12px;
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* login button */
+.btn-login {
+    padding: 10px;
+    font-weight: 500;
+}
+
+/*  media responsive */
+@media (max-width: 768px) {
+    .login-card {
+        padding: 20px !important;
+    }
+}
