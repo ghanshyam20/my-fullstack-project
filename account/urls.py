@@ -16,6 +16,10 @@ urlpatterns=[
     path('settings/', views.account_settings, name='account-settings'),
     path('apply-writer/', views.apply_writer, name='apply-writer'),
     path('writer-pending/', views.writer_pending, name='writer-pending'),
+    path('forgot-password/', views.forgot_password, name='forgot-password'),
+    path('reset-verify/<int:user_id>/', views.verify_reset_otp, name='reset-verify'),
+    path('reset-password/<int:user_id>/', views.reset_password, name='reset-password'),
+
     
 
 
