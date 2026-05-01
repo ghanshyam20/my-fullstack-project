@@ -3,6 +3,6 @@ __pycache__/
 *.pyc
 db.sqlite3
 .env
+media/
 
 
-# we are trying to ignore these files and crd 

@@ -1,53 +1,92 @@
 {% extends 'writer/navbar.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
 
 {% block content %}
 
-<h4 class="mb-4">Create Article</h4>
+<!-- quill css  -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
-<div class="row">
-    <div class="col-md-8">
+<div class="container py-4">
 
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
+  <h4 class="fw-bold mb-4">Create Article</h4>
 
-                <h5 class="mb-3">Write your article</h5>
+  <div class="row">
+    <div class="col-lg-8">
 
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
+      <div class="card shadow-sm article-card">
+        <div class="card-body p-4">
 
-                   
-                    <div class="mb-3">
-                        <label class="form-label">Title</label>
-                        {{ CreateArticleForm.title }}
-                    </div>
+          <h5 class="mb-3">Write your article</h5>
 
-                   
-                    <div class="mb-3">
-                        <label class="form-label">Content</label>
-                        {{ CreateArticleForm.content }}
-                    </div>
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
 
-                   
-                    <div class="form-check mb-3">
-                        {{ CreateArticleForm.is_premium }}
-                        <label class="form-check-label ms-2">Premium Article</label>
-                    </div>
-
-              
-                    <div class="mb-3">
-                        <label class="form-label">Upload Images</label>
-                        <input type="file" name="images" class="form-control" multiple>
-                    </div>
-
-                    <button class="btn btn-success">Publish Article</button>
-
-                </form>
-
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Title</label>
+              {{ CreateArticleForm.title }}
             </div>
+
+            <!-- content editor -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Content</label>
+
+              <!-- quill  Editor -->
+              <div id="editor"></div>
+
+              <!-- text textarea-->
+              <textarea name="content" id="hidden-content" hidden></textarea>
+
+              <div class="form-text">
+                You can write your article in markdown format. Use the toolbar above to format your text.
+              </div>
+            </div>
+
+            <!-- article type  -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Article Type</label>
+
+              {% for radio in CreateArticleForm.is_premium %}
+                <div class="form-check">
+                  {{ radio.tag }}
+                  <label class="form-check-label ms-2">
+                    {{ radio.choice_label }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+
+           
+<div class="mb-4">
+  <label class="form-label fw-semibold">Upload Images</label>
+
+  <input type="file"
+         name="images"
+         id="image-input"
+         class="form-control"
+         multiple>
+
+  
+  <div id="image-preview" class="d-flex flex-wrap mt-2"></div>
+</div>
+
+            <button class="btn btn-success w-100">
+              Publish Article
+            </button>
+
+          </form>
+
         </div>
+      </div>
 
     </div>
+  </div>
+
 </div>
+
+<!-- quill js  -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+
+<script src="{% static 'writer/js/create_article.js' %}"></script>
 
 {% endblock %}

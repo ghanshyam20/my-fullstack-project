@@ -1,7 +1,7 @@
-function showToast(msg) {
-    const toast = new bootstrap.Toast(document.getElementById("toast"));
-    document.getElementById("toast-body").innerText = msg;
-    toast.show();
+function showToast(message) {
+    const toastEl = document.getElementById("toast");
+    document.getElementById("toast-body").innerText = message;
+    new bootstrap.Toast(toastEl).show();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,13 +13,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // image preview
     document.querySelectorAll(".clickable-img").forEach(img => {
         img.addEventListener("click", () => {
-
             if (img.dataset.locked) {
                 showToast("Upgrade to view image");
                 return;
             }
 
-            document.getElementById("modalImage").src = img.src;
+            document.getElementById("modalImage").src = img.dataset.src;
             new bootstrap.Modal(document.getElementById("imageModal")).show();
         });
     });
@@ -28,32 +27,34 @@ document.addEventListener("DOMContentLoaded", () => {
     likeBtn?.addEventListener("click", async () => {
         const res = await fetch(likeBtn.dataset.url);
         const data = await res.json();
-
         document.getElementById("like-count").innerText = data.total_likes;
         showToast("Liked");
     });
 
-    // bookmark for  article 
+    // for save
     bookmarkBtn?.addEventListener("click", async () => {
         await fetch(bookmarkBtn.dataset.url, {
             method: "POST",
             headers: { "X-CSRFToken": getCSRFToken() }
         });
-
         showToast("Saved");
     });
 
-    // for report 
+    // comment toggle
+    document.getElementById("comment-toggle")?.addEventListener("click", () => {
+        document.getElementById("comment-box").classList.toggle("d-none");
+    });
+
+    // comment submit
+    document.getElementById("comment-form")?.addEventListener("submit", (e) => {
+        showToast("Comment added");
+    });
+
+    // report
     reportBtn?.addEventListener("click", async () => {
+        const reason = document.getElementById("report-reason").value;
 
-        const reason = document.getElementById("report-reason").value.trim();
-
-        if (!reason) {
-            showToast("Enter reason first");
-            return;
-        }
-
-        const res = await fetch(`/client/report/${ARTICLE_ID}/`, {
+        await fetch(`/client/report/${ARTICLE_ID}/`, {
             method: "POST",
             headers: {
                 "X-CSRFToken": getCSRFToken(),
@@ -62,25 +63,13 @@ document.addEventListener("DOMContentLoaded", () => {
             body: `reason=${encodeURIComponent(reason)}`
         });
 
-        const data = await res.json();
-
-        if (data.status === "already_reported") {
-            showToast("Already reported");
-        } else {
-            showToast("Report submitted");
-        }
-
-        document.getElementById("report-reason").value = "";
         bootstrap.Modal.getInstance(document.getElementById("reportModal")).hide();
-    });
-
-    // comment TOGGLE
-    document.getElementById("comment-toggle")?.addEventListener("click", () => {
-        document.getElementById("comment-box").classList.toggle("d-none");
+        showToast("Report submitted");
     });
 
 });
 
+// edit comment
 function editComment(id) {
     const textEl = document.getElementById(`comment-text-${id}`);
     const newText = prompt("Edit comment", textEl.innerText);
@@ -99,8 +88,24 @@ function editComment(id) {
     .then(data => {
         if (data.success) {
             textEl.innerText = data.content;
-            showToast("Updated");
+            showToast("Comment updated");
         }
+    });
+}
+
+// delete comment
+function deleteComment(id) {
+    if (!confirm("Delete this comment?")) return;
+
+    fetch(`/client/delete-comment/${id}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken()
+        }
+    })
+    .then(() => {
+        location.reload();
+        showToast("Deleted");
     });
 }
 

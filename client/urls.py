@@ -4,7 +4,7 @@ from .import views
 
 
 urlpatterns=[
-    path('client-dashboard',views.client_dashboard,name="client-dashboard"),
+    path('client-dashboard/',views.client_dashboard,name="client-dashboard"),
     
     path('article/<int:id>/', views.article_detail, name='article-detail'),
     path('toggle-like/<int:article_id>/', views.toggle_like, name='toggle-like'),
@@ -13,5 +13,9 @@ urlpatterns=[
     path('report/<int:article_id>/', views.report_article, name='report-article'),
     path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete-comment'),
     path('edit-comment/<int:comment_id>/', views.edit_comment, name='edit-comment'),
-    path('edit-comment/<int:comment_id>', views.edit_comment, name='edit-comment'),
+    path('subscription/', views.subscription_page, name='subscription-page'),
+    path('create-order/', views.create_paypal_order, name='create-order'),
+    path('payment-success/', views.payment_success, name='payment-success'),
+    path('payment-cancel/', views.payment_cancel, name='payment-cancel'),
+   
 ]

@@ -1,34 +1,164 @@
-/* smooth card feel */
+/* global  */
+body {
+    font-family: system-ui;
+    font-size: 16px;
+}
+
+/* for layout */
+.dashboard-container {
+    max-width: 1100px;
+}
+
+/* navbar*/
+.navbar-right {
+    width: auto;
+}
+
+/* search*/
+.search-wrapper {
+    width: 280px;
+}
+
+.search-input {
+    border-radius: 8px;
+    padding: 8px 12px;
+    transition: 0.2s;
+}
+
+.search-input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13,110,253,0.2);
+}
+
+/* for user */
+.user-btn {
+    border-radius: 8px;
+}
+
+/* sub navigation */
+.nav-pills .nav-link {
+    color: #555;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.nav-pills .nav-link.active {
+    background: #0d6efd;
+    color: white;
+}
+
+/* cards */
 .article-card {
-    transition: all 0.2s ease;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    transition: all 0.25s ease;
 }
 
 .article-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
 }
 
-/* image wrapper keeps clean ratio */
+/* for imagge*/
 .image-wrapper {
     width: 100%;
     aspect-ratio: 16/9;
-    overflow: hidden;
     background: #eee;
+    overflow: hidden;
 }
 
-/* responsive image fit */
 .article-img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    background-color: #f1f1f1;
-}
-
-/* clickable */
-.clickable-img {
+    object-fit: cover;
     cursor: pointer;
+    transition: 0.3s;
 }
 
-/* better text spacing */
-.card-body p {
+.article-img:hover {
+    transform: scale(1.03);
+}
+
+/*text */
+.article-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* author */
+.article-author {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
+.article-author::before {
+    content: "👤";
+    font-size: 0.8rem;
+}
+
+/* date */
+.article-date {
+    font-size: 0.75rem;
+    color: #999;
+    margin-bottom: 8px;
+}
+
+/* for content */
+.article-text {
+    font-size: 0.9rem;
+    color: #555;
     line-height: 1.5;
+}
+
+/* badge */
+.badge {
+    font-size: 0.7rem;
+    padding: 5px 8px;
+    border-radius: 6px;
+}
+
+/* to highlight */
+mark {
+    background: #ffe066;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+
+h3 {
+    font-size: 1.8rem;
+}
+
+/* search  */
+.search-wrapper input {
+    min-width: 220px;
+}
+
+.search-wrapper .btn {
+    white-space: nowrap;
+}
+
+/* mobile responsive */
+@media (max-width: 768px) {
+
+    .search-wrapper {
+        width: 100%;
+    }
+
+    .navbar .container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .dashboard-container {
+        padding: 10px;
+    }
 }

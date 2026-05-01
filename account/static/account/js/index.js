@@ -72,3 +72,14 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  // feature expand
+  document.querySelectorAll(".feature-box").forEach(box => {
+    box.addEventListener("click", () => {
+      box.classList.toggle("active");
+    });
+  });
+
+});
