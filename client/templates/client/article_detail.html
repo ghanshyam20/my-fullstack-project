@@ -1,220 +1,182 @@
+{% extends "base.html" %}
 {% load static %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>{{ article.title }}</title>
 
-   
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'client/css/article_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container article-container py-4">
+
+    <!-- back link -->
+    <a href="{% url 'client-dashboard' %}" class="btn back-btn">
+        ← Back
+    </a>
+
+    <div class="card article-card shadow-sm">
+
+        <!-- for image grid -->
+        {% if article.images.all %}
+        <div class="image-grid">
+            {% for img in article.images.all %}
+            <div class="img-box">
+
+                <img src="{{ img.image.url }}"
+                     class="article-img clickable-img
+                     {% if not can_access and article.is_premium and forloop.counter > 2 %}blur-img{% endif %}"
+                     data-src="{{ img.image.url }}"
+
+                     {% if not can_access and article.is_premium and forloop.counter > 2 %}
+                     data-locked="true"
+                     {% endif %}
+                >
+
+                {% if not can_access and article.is_premium and forloop.counter > 2 %}
+                <div class="img-overlay">Premium</div>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
     
-    <link rel="stylesheet" href="{% static 'client/css/article.css' %}" />
-  </head>
+        <h2 class="article-title">{{ article.title }}</h2>
 
-  <body class="bg-light">
-    <main class="container py-5">
-      <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-          <article class="card shadow-sm">
-            
-            {% if article.images.first %}
-            <img
-              src="{{ article.images.first.image.url }}"
-              class="hero-img clickable-img"
-              data-img="{{ article.images.first.image.url }}"
-            />
-            {% endif %}
+        <!-- meta -->
+        <p class="article-meta">
+            {{ article.user.first_name|default:article.user.email }} · {{ article.date_posted|date:"M d, Y" }}
+        </p>
 
-            <div class="card-body">
-              
-              {% if messages %} {% for message in messages %}
-              <div
-                class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3"
-              >
-                {{ message }}
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="alert"
-                ></button>
-              </div>
-              {% endfor %} {% endif %}
+        <!-- actions -->
+        <div class="action-bar">
 
-     
-              <h2>{{ article.title }}</h2>
+            <button id="like-btn"
+                data-url="{% url 'toggle-like' article.id %}"
+                class="btn btn-outline-primary">
+                Like <span id="like-count">{{ article.like_set.count }}</span>
+            </button>
 
-              <p class="text-muted">
-                {{ article.date_posted|date:"F j, Y · g:i a" }}
-              </p>
+            <button id="bookmark-btn"
+                data-url="{% url 'toggle-bookmark' article.id %}"
+                class="btn btn-outline-warning">
+                Save
+            </button>
 
-           
-              <div class="mb-3">{{ article.content }}</div>
+            <button id="comment-toggle"
+                class="btn btn-outline-secondary">
+                Comment
+            </button>
 
-     
-              <div class="d-flex gap-2 flex-wrap">
-             
-                <button
-                  id="like-btn"
-                  class="btn btn-outline-primary btn-sm"
-                  data-url="{% url 'toggle-like' article.id %}"
-                >
-                  👍 Like (<span id="like-count"
-                    >{{ article.like_set.count }}</span
-                  >)
-                </button>
+            <button class="btn btn-outline-danger"
+                data-bs-toggle="modal"
+                data-bs-target="#reportModal">
+                Report
+            </button>
 
-                
-                <button
-                  id="comment-toggle"
-                  class="btn btn-outline-secondary btn-sm"
-                >
-                  💬 Comment
-                </button>
+        </div>
 
-                
-                <button
-                  id="bookmark-btn"
-                  data-url="{% url 'toggle-bookmark' article.id %}"
-                  class="btn btn-sm {% if is_bookmarked %}btn-warning text-dark{% else %}btn-outline-warning{% endif %}"
-                >
-                  🔖 Bookmark (<span id="bookmark-count"
-                    >{{ article.bookmark_set.count }}</span
-                  >)
-                </button>
+        <!-- content  -->
+        {% if can_access %}
+            <div class="article-content">
+                {{ article.content|safe }}
+            </div>
+        {% else %}
+            <div class="article-content">
+                {{ article.content|striptags|truncatewords:60 }}
+            </div>
 
-            
-                <button
-                  class="btn btn-outline-danger btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#reportModal"
-                >
-                  🚩 Report
-                </button>
-              </div>
+            <div class="premium-box">
+                Premium content locked
+                <br>
+             <a href="{% url 'subscription-page' %}?next={{ request.get_full_path|urlencode }}" 
+                class="btn btn-warning">
+                Upgrade
+            </a>
+            </div>
+        {% endif %}
 
-              <hr />
+        <!-- comment-->
+        <div id="comment-box" class="d-none mt-4">
+            <form id="comment-form" method="POST" action="{% url 'add-comment' article.id %}">
+                {% csrf_token %}
+                <textarea name="content" class="form-control mb-2" placeholder="Write your comment..." required></textarea>
+                <button class="btn btn-primary btn-sm">Post Comment</button>
+            </form>
+        </div>
 
-              
-              <div id="comment-box" class="d-none">
-                <h6 class="mb-3">Comments</h6>
+        <!-- comments  -->
+        <div class="comments-section mt-4">
+            <h6>Comments</h6>
 
-        
-                <div id="comment-list">
-                  {% for comment in comments %}
-                  <div
-                    class="border rounded p-2 mb-2"
-                    id="comment-{{ comment.id }}"
-                  >
-                    <div class="d-flex justify-content-between">
-                      <strong>
-                        {{ comment.user.first_name|default:comment.user.email }}
-                      </strong>
+            {% for comment in comments %}
+            <div class="comment-box">
 
-                      {% if comment.user == request.user %}
-                      <div class="d-flex gap-2">
-                        
-                        <button
-                          class="btn btn-sm btn-link p-0 edit-btn"
-                          data-id="{{ comment.id }}"
-                          data-content="{{ comment.content }}"
-                        >
-                          Edit
-                        </button>
-
-                    
-                        <a
-                          href="{% url 'delete-comment' comment.id %}"
-                          class="text-danger small"
-                        >
-                          Delete
-                        </a>
-                      </div>
-                      {% endif %}
-                    </div>
-
-                
-                    <p class="mb-1 comment-text">{{ comment.content }}</p>
-
-                    
-                    <div class="edit-box d-none mt-2">
-                      <textarea class="form-control mb-2 edit-input"></textarea>
-
-                      <button
-                        class="btn btn-sm btn-success save-edit"
-                        data-id="{{ comment.id }}"
-                      >
-                        Save
-                      </button>
-
-                      <button class="btn btn-sm btn-secondary cancel-edit">
-                        Cancel
-                      </button>
-                    </div>
-
-                    <small class="text-muted">{{ comment.date_posted }}</small>
-                  </div>
-                  {% endfor %}
+                <div class="d-flex justify-content-between">
+                    <strong>{{ comment.user.first_name }}</strong>
+                    <small>{{ comment.date_posted|timesince }} ago</small>
                 </div>
 
-              
-                <form method="POST" action="{% url 'add-comment' article.id %}">
-                  {% csrf_token %}
-                  <textarea
-                    name="content"
-                    class="form-control mb-2"
-                    placeholder="Write a comment..."
-                    required
-                  ></textarea>
+                <p id="comment-text-{{ comment.id }}">{{ comment.content }}</p>
 
-                  <button class="btn btn-primary btn-sm">Post</button>
-                </form>
-              </div>
+                {% if comment.user == request.user %}
+                <div class="comment-actions">
+                    <button onclick="editComment({{ comment.id }})" class="btn btn-sm btn-light">Edit</button>
+                    <button onclick="deleteComment({{ comment.id }})" class="btn btn-sm btn-danger">Delete</button>
+                </div>
+                {% endif %}
+
             </div>
-          </article>
+            {% empty %}
+            <p>No comments yet</p>
+            {% endfor %}
         </div>
-      </div>
-    </main>
 
-    
-    <div class="modal fade" id="imageModal">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <img id="modalImage" class="w-100" />
-        </div>
-      </div>
     </div>
+</div>
 
-    
-    <div class="modal fade" id="reportModal">
-      <div class="modal-dialog">
-        <div class="modal-content p-3">
-          <h5>Report Article</h5>
+<!-- image model  -->
+<div class="modal fade" id="imageModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <img id="modalImage" class="w-100">
+    </div>
+  </div>
+</div>
 
-          <label class="form-label">Why are you reporting this?</label>
+<!-- report modal  -->
+<div class="modal fade" id="reportModal">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+        <h5>Report Article</h5>
+        <textarea id="report-reason" class="form-control mb-2"
+            placeholder="Why are you reporting this article?"></textarea>
 
-          <textarea
-            id="report-reason"
-            class="form-control mb-2"
-            placeholder="Spam, abusive content, etc..."
-          ></textarea>
-
-          <button id="submit-report" class="btn btn-danger">
+        <button id="submit-report" class="btn btn-danger w-100">
             Submit Report
-          </button>
-        </div>
-      </div>
+        </button>
     </div>
+  </div>
+</div>
 
-  
-    <script>
-      const ARTICLE_ID = {{ article.id }};
-    </script>
+<!-- toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="toast" class="toast text-bg-dark border-0">
+    <div class="d-flex">
+      <div class="toast-body" id="toast-body"></div>
+      <button class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
 
-    <script src="{% static 'client/js/article.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
-</html>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ARTICLE_ID = {{ article.id }};
+</script>
+<script src="{% static 'client/js/article_detail.js' %}"></script>
+{% endblock %}

@@ -1,6 +1,5 @@
 import random
 import json
-
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate, login, logout
@@ -8,11 +7,13 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib import messages
-
+from writer.forms import UpdateUserForm
 from .forms import CreateUserForm, LoginForm
 from .models import EmailOtp, CustomUser
 from writer.models import Article
 from django.contrib.messages import get_messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 def home(request):
@@ -263,14 +264,62 @@ def export_data(request):
 #  for account settings
 
 @login_required
-def account_settings(request):
-    context = {
-        'UpdateUserForm': UpdateUserForm(),
-        'PasswordForm': PasswordForm(),
-        'subscription': None,
-    }
-    return render(request, 'account/account_settings.html', context)
+def profile_page(request):
 
+    user = request.user
+
+    update_form = UpdateUserForm(instance=user)
+    password_form = PasswordChangeForm(user=user)
+
+    # subscription (for both user + writer if exists)
+    subscription = None
+    try:
+        subscription = user.subscription
+    except:
+        pass
+
+    if request.method == "POST":
+
+        # update profile
+        if "update_profile" in request.POST:
+            update_form = UpdateUserForm(request.POST, instance=user)
+
+            if update_form.is_valid():
+                update_form.save()
+                messages.success(request, "Profile updated")
+                return redirect('profile-page')
+
+        # Change password
+        elif "change_password" in request.POST:
+            password_form = PasswordChangeForm(user=user, data=request.POST)
+
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Password updated")
+                return redirect('profile-page')
+
+        # update  bio and image
+        elif "update_profile_extra" in request.POST:
+
+            profile = user.profile
+
+            profile.bio = request.POST.get("bio")
+
+            if request.FILES.get("profile_picture"):
+                profile.profile_picture = request.FILES.get("profile_picture")
+
+            profile.save()
+            messages.success(request, "Profile updated")
+            return redirect('profile-page')
+
+    return render(request, 'account/profile.html', {
+        'UpdateUserForm': update_form,
+        'PasswordForm': password_form,
+        'subscription': subscription,
+    })
+
+   
 
 
 # for  APPLY WRITER (logged user )
@@ -330,7 +379,7 @@ def forgot_password(request):
                 EmailOtp.objects.create(user=user, otp=otp_code)
 
             send_mail(
-                subject="Reset Your Password – InsightHub",
+                subject="Reset Your Password - InsightHub",
                 message=f"Your OTP is: {otp_code}",
                 from_email=None,
                 recipient_list=[email],
@@ -355,7 +404,7 @@ def reset_password(request, user_id):
     if not user:
         return redirect('forgot-password')
 
-    # 🔒 protect route
+    #  protect route
     if request.session.get('reset_verified_user') != user.id:
         return redirect('forgot-password')
 
@@ -409,36 +458,11 @@ def verify_reset_otp(request, user_id):
 
         else:
             otp_obj.delete()
-            request.session['reset_verified_user'] = user.id   # ✅ secure
+            request.session['reset_verified_user'] = user.id   
             return redirect('reset-password', user_id=user.id)
 
     return render(request, 'account/verify_reset.html', {'user': user})
 
 
 
-    user = CustomUser.objects.get(id=user_id)
-    otp_obj = EmailOtp.objects.filter(user=user).first()
-
-    if not otp_obj:
-        messages.error(request, "No OTP found.")
-        return redirect('forgot-password')
     
-
-    if request.method == 'POST':
-
-        entered_otp = request.POST.get('otp').strip()
-
-        if otp_obj.otp != entered_otp:
-            messages.error(request, "Invalid OTP. Please try again.")
-
-        elif not otp_obj.is_valid():
-            messages.error(request, "OTP expired. Request a new one.")
-
-        else:
-            otp_obj.delete()
-            return redirect('reset-password', user_id=user.id)
-
-  
-         
-
-    return render(request, 'account/verify_reset.html', {'user': user})

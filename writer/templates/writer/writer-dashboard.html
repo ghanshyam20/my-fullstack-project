@@ -1,14 +1,81 @@
 {% extends 'writer/navbar.html' %}
-
 {% load static %}
+
 {% block content %}
 
-<div class="container bg-white shadow-md p-5 form-layout text-center">
+<div class="container py-4">
 
-    <h5> Welcome, Dear {{user.first_name}}</h5>
+  <!-- for header  -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">Dashboard</h3>
+
+    <a href="{% url 'create-article' %}" class="btn btn-primary">
+      + New Article
+    </a>
+  </div>
+
+  <!-- stats  -->
+  <div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 p-3">
+        <small class="text-muted">Total Articles</small>
+        <h3 class="fw-bold">{{ total_articles }}</h3>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 p-3">
+        <small class="text-muted">Premium</small>
+        <h3 class="fw-bold text-warning">{{ premium_articles }}</h3>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 p-3">
+        <small class="text-muted">Free</small>
+        <h3 class="fw-bold text-success">{{ free_articles }}</h3>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- recent articles  -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+
+      <h5 class="fw-bold mb-3">Recent Articles</h5>
+
+      {% for article in recent_articles %}
+      <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+
+        <div>
+          <div class="fw-semibold">{{ article.title }}</div>
+          <small class="text-muted">{{ article.date_posted|date:"M d, Y" }}</small>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+
+          {% if article.is_premium %}
+            <span class="badge bg-warning text-dark">Premium</span>
+          {% else %}
+            <span class="badge bg-secondary">Free</span>
+          {% endif %}
+
+          <a href="{% url 'update-article' article.id %}" class="btn btn-sm btn-outline-primary">
+            Edit
+          </a>
+
+        </div>
+
+      </div>
+      {% empty %}
+        <p class="text-muted">No articles yet.</p>
+      {% endfor %}
+
+    </div>
+  </div>
+
 </div>
-    
-
 
 {% endblock %}
-

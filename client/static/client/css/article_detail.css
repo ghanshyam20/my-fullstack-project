@@ -1,0 +1,101 @@
+.article-container {
+    max-width: 850px;
+}
+
+.article-card {
+    padding: 25px;
+    border-radius: 12px;
+}
+
+.back-btn {
+    background: #111;
+    color: #fff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.img-box {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.article-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.article-img:hover {
+    transform: scale(1.05);
+}
+
+.blur-img {
+    filter: blur(12px);
+}
+
+.img-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.article-title {
+    font-size: 1.8rem;
+}
+
+.article-meta {
+    color: gray;
+    font-size: 0.85rem;
+}
+
+.action-bar {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.article-content {
+    line-height: 1.7;
+}
+
+.premium-box {
+    background: #fff3cd;
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.comment-box {
+    border: 1px solid #eee;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.comment-actions {
+    margin-top: 5px;
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .img-box {
+        height: 160px;
+    }
+}

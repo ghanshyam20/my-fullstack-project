@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5 text-center">
+
+    <h2>Upgrade to Premium</h2>
+    <p class="text-muted">Unlock all premium articles instantly</p>
+
+    <div class="card mx-auto mt-4" style="max-width: 400px;">
+        <div class="card-body">
+
+            <h4>Premium Plan</h4>
+            <h2>€4.99 / month</h2>
+
+            <ul class="text-start mt-3">
+                <li>✔ Access all premium articles</li>
+                <li>✔ Full images & content</li>
+                <li>✔ No restrictions</li>
+            </ul>
+
+            <a href="{% url 'create-order' %}?next={{ next_url }}" 
+                class="btn btn-success w-100">
+                Upgrade Now
+            </a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

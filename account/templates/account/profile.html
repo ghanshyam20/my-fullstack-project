@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container py-5" style="max-width: 1000px;">
+
+    <h4 class="mb-4">My Profile</h4>
+
+    <div class="row g-4">
+
+        <!-- left side  -->
+        <div class="col-md-6">
+
+            <!-- for account details -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6>Account Details</h6>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ UpdateUserForm|crispy }}
+
+                        <button name="update_profile" class="btn btn-success w-100 mt-2">
+                            Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- for profile image and bio -->
+            <div class="card shadow-sm mt-3 text-center">
+                <div class="card-body">
+
+                    <h6>Profile</h6>
+
+                    <img src="{{ request.user.profile.profile_picture.url }}"
+                         class="rounded-circle mb-3"
+                         width="90" height="90">
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <input type="file" name="profile_picture" class="form-control mb-2">
+
+                        <textarea name="bio" class="form-control mb-2"
+                            placeholder="Bio">{{ request.user.profile.bio }}</textarea>
+
+                        <button name="update_profile_extra" class="btn btn-dark w-100">
+                            Update Profile
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+
+       <!-- right side  -->
+<div class="col-md-6">
+
+    <!-- pasword  -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h6>Change Password</h6>
+
+            <form method="POST">
+                {% csrf_token %}
+                {{ PasswordForm|crispy }}
+
+                <button name="change_password" class="btn btn-warning w-100 mt-2">
+                    Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- client only  -->
+    {% if not request.user.is_writer %}
+    <div class="card shadow-sm mt-3 text-center">
+        <div class="card-body">
+
+            <h6>Subscription</h6>
+
+            {% if subscription %}
+                <p class="fw-bold">{{ subscription.plan }}</p>
+                <small>Expires: {{ subscription.expires_at }}</small>
+            {% else %}
+                <p>Free Plan</p>
+                <a href="#" class="btn btn-success w-100">
+                    Upgrade
+                </a>
+            {% endif %}
+
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- writer only  -->
+    {% if request.user.is_writer %}
+    <div class="card shadow-sm mt-3">
+        <div class="card-body">
+
+            <h6>Writer Tools</h6>
+
+            <a href="{% url 'create-article' %}" class="btn btn-dark w-100 mb-2">
+                Create Article
+            </a>
+
+            <a href="{% url 'my-articles' %}" class="btn btn-outline-dark w-100">
+                My Articles
+            </a>
+
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+    </div>
+
+</div>
+
+{% endblock %}
