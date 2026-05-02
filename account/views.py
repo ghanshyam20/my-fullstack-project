@@ -7,6 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib import messages
+from cms import settings
 from cms.settings import EMAIL_HOST_USER
 from writer.forms import UpdateUserForm
 from .forms import CreateUserForm, LoginForm
@@ -67,7 +68,7 @@ def register(request):
             #  for OTP
             otp_code = secrets.randbelow(900000) + 100000
             EmailOtp.objects.filter(user=user).delete()
-            EmailOtp.objects.create(user=user, otp=otp_code)
+            EmailOtp.objects.create(user=user, otp=str(otp_code))
 
            
             
@@ -124,7 +125,7 @@ def verify_otp(request, user_id):
         print("Match", otp_obj.otp == entered_otp)
         print("Is Valid:", otp_obj.is_valid())
 
-        if otp_obj.otp == entered_otp and otp_obj.is_valid():
+        if str(otp_obj.otp) == entered_otp and otp_obj.is_valid():
             user.is_active = True
             user.save()
             otp_obj.delete()
@@ -142,7 +143,7 @@ def verify_otp(request, user_id):
                         "You will receive another email once approved.\n\n"
                         "InsightHub Team"
                     ),
-                    from_email=None,
+                    from_email=EMAIL_HOST_USER,
                     recipient_list=[user.email],
                     fail_silently=False,
                 )
@@ -151,7 +152,7 @@ def verify_otp(request, user_id):
             
 
             else:
-                login_link="http://localhost:8000/my-login/"
+                login_link=f"{settings.SITE_URL}/my-login/"
 
                 send_mail(
                     subject="Welcome to InsightHub",
