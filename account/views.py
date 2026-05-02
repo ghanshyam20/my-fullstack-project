@@ -15,6 +15,10 @@ from django.contrib.messages import get_messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def home(request):
     return render(request, 'account/index.html')
@@ -275,8 +279,9 @@ def profile_page(request):
     subscription = None
     try:
         subscription = user.subscription
-    except:
-        pass
+    except Exception as e:
+        logger.error(f"Subscription error:{e}")
+        
 
     if request.method == "POST":
 

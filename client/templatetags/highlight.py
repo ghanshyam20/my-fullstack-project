@@ -1,6 +1,9 @@
-from django import template
-from django.utils.safestring import mark_safe
+import logging
 import re
+from django import template
+from django.utils.html import escape
+
+logger = logging.getLogger(__name__)
 
 register = template.Library()
 
@@ -18,6 +21,7 @@ def highlight(text, search):
             lambda m: f'<mark>{m.group(0)}</mark>',
             text
         )
-        return mark_safe(highlighted)
-    except:
+        return escape(highlighted)
+    except Exception as e:
+        logger.error(f"Highlight error: {e}")
         return text
