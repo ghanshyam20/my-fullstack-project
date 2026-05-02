@@ -60,11 +60,14 @@ def create_article(request):
                     for file in files:
                         #  basic validation
                         if file.content_type.startswith('image/'):
-                            ArticleImage.objects.create(
+                            img=ArticleImage.objects.create(
                                 article=article,
                                 image=file
                             )
-                          
+
+                            print("IMAGE CREATED:", img)
+                            print("URL:", img.image.url)
+
 
                 messages.success(request, "Article published successfully!")
                 return redirect('my-articles')
