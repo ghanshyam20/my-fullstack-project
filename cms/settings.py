@@ -185,3 +185,10 @@ MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 
 print("STORAGE:", DEFAULT_FILE_STORAGE)
 print("KEY:", AWS_ACCESS_KEY_ID)
+
+
+# for termp solution 
+AWS_DEFAULT_ACL = "public-read"
+AWS_S3_OBJECT_PARAMETERS = {
+    "ACL": "public-read"
+}
