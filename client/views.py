@@ -29,7 +29,8 @@ def get_paypal_token():
     response = requests.post(
         url,
         auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_SECRET),
-        data={"grant_type": "client_credentials"}
+        data={"grant_type": "client_credentials"},
+        timeout=5
     )
 
     return response.json()['access_token']
@@ -315,7 +316,8 @@ def create_paypal_order(request):
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {token}"
-        }
+        },
+        timeout=5
     )
 
     order = response.json()
@@ -348,7 +350,8 @@ def payment_success(request):
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {token}"
-            }
+            },
+            timeout=5
         )
 
         data = response.json()

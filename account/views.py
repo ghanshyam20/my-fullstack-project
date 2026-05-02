@@ -1,4 +1,4 @@
-import random
+import secrets
 import json
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
@@ -14,6 +14,10 @@ from writer.models import Article
 from django.contrib.messages import get_messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def home(request):
@@ -60,7 +64,7 @@ def register(request):
             user.save()
 
             #  for OTP
-            otp_code = str(random.randint(100000, 999999))
+            otp_code = secrets.randbelow(900000) + 100000
             EmailOtp.objects.filter(user=user).delete()
             EmailOtp.objects.create(user=user, otp=otp_code)
 
@@ -275,8 +279,9 @@ def profile_page(request):
     subscription = None
     try:
         subscription = user.subscription
-    except:
-        pass
+    except Exception as e:
+        logger.error(f"Subscription error:{e}")
+        
 
     if request.method == "POST":
 
@@ -374,7 +379,7 @@ def forgot_password(request):
             if otp_obj and otp_obj.is_valid():
                 otp_code = otp_obj.otp
             else:
-                otp_code = str(random.randint(100000, 999999))
+                otp_code = str(secrets.randbelow(900000) + 100000)
                 EmailOtp.objects.filter(user=user).delete()
                 EmailOtp.objects.create(user=user, otp=otp_code)
 

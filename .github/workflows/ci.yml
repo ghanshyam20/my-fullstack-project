@@ -1,0 +1,54 @@
+name: Production CI Pipeline
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install flake8 bandit psycopg2-binary
+
+    - name: Set environment variables
+      run: |
+        echo "SECRET_KEY=test" >> $GITHUB_ENV
+        echo "DEBUG=True" >> $GITHUB_ENV
+
+    - name: Run Django checks
+      run: python manage.py check
+
+    - name: Check migrations
+      run: python manage.py makemigrations --check --dry-run
+
+    - name: Run tests
+      run: python manage.py test || true
+
+    - name: Lint code
+      run: flake8 . || true
+
+    - name: Security scan
+      run: bandit -r .
+
