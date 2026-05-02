@@ -188,7 +188,8 @@ print("KEY:", AWS_ACCESS_KEY_ID)
 
 
 # for termp solution 
-AWS_DEFAULT_ACL = "public-read"
+AWS_DEFAULT_ACL = None
+
 AWS_S3_OBJECT_PARAMETERS = {
     "ACL": "public-read"
 }
