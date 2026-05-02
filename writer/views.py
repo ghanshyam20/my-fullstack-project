@@ -38,6 +38,8 @@ def create_article(request):
     form = ArticleForm()
 
     if request.method == 'POST':
+        
+        print("FILES:", request.FILES)
 
         data = request.POST.copy()
         data['content'] = request.POST.get('content', '').strip()
