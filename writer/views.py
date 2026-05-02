@@ -76,6 +76,7 @@ def create_article(request):
     return render(request, 'writer/create-article.html', context)
 
 
+
 @login_required(login_url='my-login')
 def my_articles(request):
 

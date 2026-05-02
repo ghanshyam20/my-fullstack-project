@@ -3,8 +3,9 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 
-load_dotenv()
-
+DEBUG = True
+if DEBUG:
+    load_dotenv()   
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -17,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY =os.getenv('SECRET_KEY','fallback-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
 
 # this means we are now in developing phase , not in prodcution 
 
@@ -179,3 +180,8 @@ AWS_QUERYSTRING_AUTH = False
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+
+
+
+print("STORAGE:", DEFAULT_FILE_STORAGE)
+print("KEY:", AWS_ACCESS_KEY_ID)
