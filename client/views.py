@@ -32,6 +32,8 @@ def get_paypal_token():
         data={"grant_type": "client_credentials"},
         timeout=5
     )
+    data=response.json()
+    print("PAYPAL TOKEN RESPONSE:", data)
 
     return response.json()['access_token']
 
@@ -305,8 +307,8 @@ def create_paypal_order(request):
             }
         }],
         "application_context": {
-            "return_url": f"http://127.0.0.1:8000/client/payment-success/?next={next_url}",
-            "cancel_url": "http://127.0.0.1:8000/client/payment-cancel/"
+            "return_url": f"{settings.SITE_URL}/client/payment-success/?next={next_url}",
+            "cancel_url": f"{settings.SITE_URL}/client/payment-cancel/"
         }
     }
 
