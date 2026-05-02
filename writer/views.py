@@ -64,8 +64,10 @@ def create_article(request):
                                 article=article,
                                 image=file
                             )
+
                             print("IMAGE CREATED:", img)
                             print("URL:", img.image.url)
+
 
                 messages.success(request, "Article published successfully!")
                 return redirect('my-articles')
