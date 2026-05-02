@@ -64,6 +64,7 @@ def create_article(request):
                                 article=article,
                                 image=file
                             )
+                          
 
                 messages.success(request, "Article published successfully!")
                 return redirect('my-articles')
