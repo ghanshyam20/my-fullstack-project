@@ -7,6 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib import messages
+from cms.settings import EMAIL_HOST_USER
 from writer.forms import UpdateUserForm
 from .forms import CreateUserForm, LoginForm
 from .models import EmailOtp, CustomUser
@@ -93,7 +94,7 @@ def register(request):
             send_mail(
                 subject="Verify Your Account – InsightHub",
                 message=message,
-                from_email=None,
+                from_email=EMAIL_HOST_USER,
                 recipient_list=[user.email],
                 fail_silently=False,
             )
@@ -164,7 +165,7 @@ def verify_otp(request, user_id):
                         "InsightHub Team"
                     ),
 
-                    from_email=None,
+                    from_email=EMAIL_HOST_USER,
                     recipient_list=[user.email],
                     fail_silently=False,
                 )
@@ -430,7 +431,7 @@ def reset_password(request, user_id):
         send_mail(
             subject="Your Password Has Been Updated – InsightHub",
             message=f"Hi {user.first_name},\n\nYour password has been updated successfully.",
-            from_email=None,
+            from_email=EMAIL_HOST_USER,
             recipient_list=[user.email],
             fail_silently=False,
         )
