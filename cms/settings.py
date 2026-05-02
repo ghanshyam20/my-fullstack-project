@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "account",
     "writer",
     'client',
+    'storages',
     
     
 ]
@@ -133,6 +134,15 @@ STATICFILES_DIRS=[BASE_DIR / 'static']
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 
 
 
@@ -157,12 +167,15 @@ EMAIL_HOST_PASSWORD =os.getenv('EMAIL_PASS')
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-INSTALLED_APPS += ["storages"]
+
 
 PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID')
 PAYPAL_SECRET = os.getenv('PAYPAL_SECRET')
 PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"
 SITE_URL = "https://ghans.me"
+
+
+
 
 AWS_ACCESS_KEY_ID = os.getenv("DO_SPACES_KEY")
 AWS_SECRET_ACCESS_KEY = os.getenv("DO_SPACES_SECRET")
@@ -174,25 +187,24 @@ AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
 
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.cdn.digitaloceanspaces.com"
 
-AWS_DEFAULT_ACL = None
+
 AWS_QUERYSTRING_AUTH = False
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
 
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 
 
 
-print("STORAGE:", DEFAULT_FILE_STORAGE)
+
 print("KEY:", AWS_ACCESS_KEY_ID)
 
 
 # for termp solution 
-AWS_DEFAULT_ACL = None
+AWS_DEFAULT_ACL ="public-read"
+AWS_S3_FILE_OVERWRITE = False
 
-AWS_S3_OBJECT_PARAMETERS = {
-    "ACL": "public-read"
-}
+
 
 AWS_LOCATION="media"
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"

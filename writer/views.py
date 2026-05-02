@@ -189,3 +189,6 @@ def account_management(request):
 
 
 
+from django.core.files.storage import default_storage
+
+print("STORAGE:", default_storage.__class__)
