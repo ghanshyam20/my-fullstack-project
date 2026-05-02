@@ -172,7 +172,7 @@ AWS_S3_REGION_NAME = os.getenv("DO_SPACES_REGION")
 
 AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
 
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.cdn.digitaloceanspaces.com"
 
 AWS_DEFAULT_ACL = "public-read"
 AWS_QUERYSTRING_AUTH = False
