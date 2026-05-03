@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About - InsightHub{% endblock %}
+
+{% block content %}
+
+<!-- hero  -->
+<section class="container text-center py-5">
+  <h1 class="fw-bold mb-3">About InsightHub</h1>
+  <p class="text-muted fs-5">
+    Learn real development by building real projects.
+  </p>
+</section>
+
+<!-- our mission -->
+<section class="container py-5">
+  <div class="row align-items-center g-5">
+
+    <div class="col-lg-6">
+      <h3 class="fw-bold">Our Mission</h3>
+      <p class="text-muted">
+        InsightHub is built to help students learn practical coding.
+        No boring theory. Only real projects and real skills.
+      </p>
+
+      <ul class="text-muted">
+        <li>Step-by-step learning</li>
+        <li>Real-world projects</li>
+        <li>Clean explanations</li>
+      </ul>
+    </div>
+
+    <div class="col-lg-6">
+      <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c"
+           class="img-fluid rounded shadow">
+    </div>
+
+  </div>
+</section>
+
+<!-- features -->
+<section class="container py-5">
+  <h3 class="text-center fw-bold mb-5">What makes it different</h3>
+
+  <div class="row g-4 text-center">
+
+    <div class="col-md-4">
+      <div class="feature-box">
+        <i class="bi bi-code-slash fs-1 text-primary"></i>
+        <h5 class="mt-3">Real Coding</h5>
+        <p class="text-muted">Not just theory</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="feature-box">
+        <i class="bi bi-lightning-charge fs-1 text-warning"></i>
+        <h5 class="mt-3">Fast Learning</h5>
+        <p class="text-muted">Simple and clear</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="feature-box">
+        <i class="bi bi-people fs-1 text-success"></i>
+        <h5 class="mt-3">Community</h5>
+        <p class="text-muted">Learn and share</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- how it works -->
+<section class="container py-5 text-center">
+  <h3 class="fw-bold mb-5">How it works</h3>
+
+  <div class="row g-4">
+
+    <div class="col-md-4">
+      <div class="step-box">
+        <h4>1. Read</h4>
+        <p>Choose topics</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="step-box">
+        <h4>2. Practice</h4>
+        <p>Follow guides</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="step-box">
+        <h4>3. Build</h4>
+        <p>Create projects</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- for cta  -->
+<section class="container py-5 text-center">
+  <div class="cta-box">
+    <h3 class="fw-bold">Start your journey</h3>
+    <p class="text-muted">Join InsightHub today</p>
+
+    <a href="{% url 'register' %}" class="btn btn-success btn-lg me-2">
+      Get Started
+    </a>
+  </div>
+</section>
+
+{% endblock %}

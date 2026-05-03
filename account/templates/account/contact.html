@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Contact - InsightHub{% endblock %}
+
+{% block content %}
+
+<!-- hero  -->
+<section class="container text-center py-5">
+  <h1 class="fw-bold mb-3">Contact Us</h1>
+  <p class="text-muted fs-5">
+    Have questions? Reach out anytime.
+  </p>
+</section>
+
+<!-- contact  -->
+<section class="container py-5">
+  <div class="row g-5">
+
+    <!-- for the left form  -->
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm">
+
+        <h4 class="fw-bold mb-3">Send a message</h4>
+
+        <form method="POST">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea class="form-control" rows="4" required></textarea>
+          </div>
+
+          <button class="btn btn-success w-100">Send Message</button>
+        </form>
+
+      </div>
+    </div>
+
+    <!--for right info  -->
+    <div class="col-lg-6">
+
+      <div class="card p-4 mb-4 shadow-sm">
+        <h5 class="fw-bold mb-3">Contact Info</h5>
+
+        <p class="text-muted mb-2">
+          <i class="bi bi-envelope"></i> ghanshyambhattarai@gmail.com
+        </p>
+
+        <p class="text-muted mb-2">
+          <i class="bi bi-telephone"></i> +358 413267055
+        </p>
+
+        <p class="text-muted">
+          <i class="bi bi-geo-alt"></i> Karamalmi Campus, Espoo, Finland
+        </p>
+      </div>
+
+      <!-- social  -->
+      <div class="card p-4 shadow-sm">
+        <h5 class="fw-bold mb-3">Follow us</h5>
+
+        <a href="#" class="text-dark me-3">
+          <i class="bi bi-github fs-4"></i>
+        </a>
+
+        <a href="#" class="text-dark me-3">
+          <i class="bi bi-linkedin fs-4"></i>
+        </a>
+
+        <a href="#" class="text-dark">
+          <i class="bi bi-twitter fs-4"></i>
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- map section  -->
+<section class="container py-5">
+  <h4 class="fw-bold text-center mb-4">Our Location</h4>
+
+  <div class="ratio ratio-16x9">
+    <iframe 
+      src="https://maps.google.com/maps?q=Espoo&t=&z=13&ie=UTF8&iwloc=&output=embed"
+      style="border:0;"
+      allowfullscreen>
+    </iframe>
+  </div>
+</section>
+
+{% endblock %}

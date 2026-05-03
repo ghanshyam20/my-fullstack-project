@@ -11,7 +11,7 @@ from cms import settings
 from cms.settings import EMAIL_HOST_USER
 from writer.forms import UpdateUserForm
 from .forms import CreateUserForm, LoginForm
-from .models import EmailOtp, CustomUser
+from .models import EmailOtp, CustomUser,ContactMessage
 from writer.models import Article
 from django.contrib.messages import get_messages
 from django.contrib.auth import update_session_auth_hash
@@ -231,6 +231,68 @@ def terms(request):
 def privacy(request):
     return render(request, 'account/privacy.html')
 
+
+def about(request):
+    return render(request, 'account/about.html')
+
+
+def contact(request):
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        message = request.POST.get("message")
+
+        if not name or not email or not message:
+            messages.error(request, "All fields are required.")
+            return redirect('contact')
+
+        try:
+            #save to postgre db
+            ContactMessage.objects.create(
+                name=name,
+                email=email,
+                message=message
+            )
+
+            # email send to admin 
+            send_mail(
+                subject=f"New Contact Message from {name}",
+                message=(
+                    f"Name: {name}\n"
+                    f"Email: {email}\n\n"
+                    f"Message:\n{message}"
+                ),
+                from_email=EMAIL_HOST_USER,
+                recipient_list=[EMAIL_HOST_USER],
+                fail_silently=False,
+            )
+
+            # email to user who contatn us 
+            send_mail(
+                subject="We received your message - InsightHub",
+                message=(
+                    f"Hi {name},\n\n"
+                    "Thanks for contacting us.\n"
+                    "We have received your message and will reply soon.\n\n"
+                    "Your message:\n"
+                    f"{message}\n\n"
+                    "InsightHub Team"
+                ),
+                from_email=EMAIL_HOST_USER,
+                recipient_list=[email],  # for the normal user  who contact us
+                fail_silently=True,
+            )
+
+            messages.success(request, "Message sent successfully!")
+
+        except Exception as e:
+            print("CONTACT ERROR:", e)
+            messages.error(request, "Something went wrong. Try again.")
+
+        return redirect('contact')
+
+    return render(request, 'account/contact.html')
 
 
 #  to let the user can Export  Data 
@@ -469,6 +531,8 @@ def verify_reset_otp(request, user_id):
             return redirect('reset-password', user_id=user.id)
 
     return render(request, 'account/verify_reset.html', {'user': user})
+
+
 
 
 
