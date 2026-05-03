@@ -22,6 +22,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+
+
 def is_writer_only(request):
     return request.user.is_writer and not request.user.is_staff
 
@@ -567,7 +569,8 @@ def payment_success(request):
                 fail_silently=True
             )
         except Exception as e:
-            pass#print("EMAIL ERROR:", e)
+            logger.error(f"Error sending email: {str(e)}")
+           
 
 
     #  handle response and activate subscription if payment completed
