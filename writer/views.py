@@ -6,6 +6,13 @@ from .models import Article, ArticleImage
 from django.contrib import messages
 from django.db import transaction
 
+def is_writer_only(request):
+    return request.user.is_writer and not request.user.is_staff
+
+def is_client_only(request):
+    return not request.user.is_writer and not request.user.is_staff
+
+
 
 
 
@@ -13,6 +20,9 @@ from django.db import transaction
 
 @login_required(login_url='my-login')
 def writer_dasboard(request):
+    # block access for normal user 
+    if is_client_only(request):
+        return redirect('client-dashboard')
 
     total_articles = Article.objects.filter(user=request.user).count()
     premium_articles = Article.objects.filter(user=request.user, is_premium=True).count()
@@ -34,6 +44,8 @@ def writer_dasboard(request):
 
 @login_required(login_url='my-login')
 def create_article(request):
+    if is_client_only(request):
+        return redirect('client-dashboard')
 
     form = ArticleForm()
 
@@ -85,6 +97,9 @@ def create_article(request):
 
 @login_required(login_url='my-login')
 def my_articles(request):
+    if is_client_only(request):
+        return redirect('client-dashboard')
+   
 
     articles = Article.objects.filter(user=request.user)
 
@@ -95,6 +110,8 @@ def my_articles(request):
 
 @login_required(login_url='my-login')
 def update_article(request, pk):
+    if is_client_only(request):
+        return redirect('client-dashboard')
 
     try:
         article = Article.objects.get(id=pk, user=request.user)
@@ -142,6 +159,9 @@ def update_article(request, pk):
 @login_required(login_url='my-login')
 def delete_article(request, pk):
 
+    if is_client_only(request):
+        return redirect('client-dashboard')
+
     try:
         article = Article.objects.get(id=pk, user=request.user)
     except Article.DoesNotExist:
@@ -158,6 +178,8 @@ def delete_article(request, pk):
 
 @login_required(login_url='my-login')
 def delete_image(request, pk):
+    if is_client_only(request):
+        return redirect('client-dashboard')
 
     try:
         image = ArticleImage.objects.get(id=pk, article__user=request.user)
@@ -172,23 +194,23 @@ def delete_image(request, pk):
 
 
 
-@login_required(login_url='my-login')
-def account_management(request):
+# @login_required(login_url='my-login')
+# def account_management(request):
 
-    form = UpdateUserForm(instance=request.user)
+#     form = UpdateUserForm(instance=request.user)
 
-    if request.method == 'POST':
-        form = UpdateUserForm(request.POST, instance=request.user)
+#     if request.method == 'POST':
+#         form = UpdateUserForm(request.POST, instance=request.user)
 
-        if form.is_valid():
-            form.save()
-            return redirect('writer-dashboard')
+#         if form.is_valid():
+#             form.save()
+#             return redirect('writer-dashboard')
 
-    context = {'UpdateUserForm': form}
-    return redirect('profile-page')
+#     context = {'UpdateUserForm': form}
+#     return redirect('profile-page')
 
 
 
-from django.core.files.storage import default_storage
+# from django.core.files.storage import default_storage
 
-print("STORAGE:", default_storage.__class__)
+# print("STORAGE:", default_storage.__class__)
