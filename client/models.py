@@ -23,7 +23,7 @@ class Subscription(models.Model):
         return (
             self.plan == "PREMIUM"
             and self.is_active
-            and self.expires_at
+            and self.expires_at is not None
             and self.expires_at > timezone.now()
         )
 
@@ -33,7 +33,7 @@ class Subscription(models.Model):
         return 0
 
     def __str__(self):
-        return f"{self.user_id} - {self.plan}"
+        return f"{self.user.email} - {self.plan}"
 
     class Meta:
         indexes = [
@@ -64,7 +64,7 @@ class Payment(models.Model):
         return self.status == "COMPLETED"
 
     def __str__(self):
-        return f"{self.user_id} - {self.amount} on {self.payment_date}"
+        return f"{self.user.email} - {self.amount} on {self.payment_date}"
 
     class Meta:
         indexes = [
@@ -94,7 +94,7 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user_id} - {self.article_id}"
+        return f"{self.user.email} - {self.article.title}"
 
     class Meta:
         indexes = [
@@ -112,7 +112,7 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user_id} likes {self.article_id}"
+        return f"{self.user.email} likes {self.article.title}"
 
     class Meta:
         constraints = [
@@ -132,7 +132,7 @@ class Bookmark(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user_id} bookmarked {self.article_id}"
+        return f"{self.user.email} bookmarked {self.article.title}"
 
     class Meta:
         constraints = [
@@ -152,7 +152,7 @@ class ArticleView(models.Model):
     viewed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user_id} viewed {self.article_id}"
+        return f"{self.user.email} viewed {self.article.title}"
 
     class Meta:
         indexes = [
@@ -171,7 +171,7 @@ class Report(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user_id} reported {self.article_id}"
+        return f"{self.user.email} reported {self.article.title}"
 
     class Meta:
         constraints = [
@@ -199,7 +199,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user_id} - {self.message}"
+        return f"{self.user.email} - {self.message}"
 
     class Meta:
         ordering = ['-created_at']
