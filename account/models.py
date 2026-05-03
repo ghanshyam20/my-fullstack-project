@@ -2,7 +2,7 @@ from django.db import models
 from django.core.mail import send_mail
 from django.conf import settings
 
-from cms.settings import EMAIL_HOST_USER
+from django.conf import settings
 
 from . managers import CustomUsermanager
 from django.contrib.auth.models import AbstractBaseUser , PermissionsMixin
@@ -41,15 +41,15 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     def save(self, *args, **kwargs):
 
         if self.pk:
-            old_user = CustomUser.objects.get(pk=self.pk).first()
+            old_user = CustomUser.objects.filter(pk=self.pk).first()
         else:
             old_user = None
 
         super().save(*args, **kwargs)
 
         #  this will trigegr send email when admin approves writer 
-        if old_user:
-            if not old_user.is_writer and self.is_writer:
+        if old_user and not old_user.is_writer and self.is_writer:
+            
                 login_link=f"{settings.SITE_URL}/my-login/"
 
                 send_mail(
@@ -62,7 +62,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
                         "Best of luck on your journey .\n\n"
                         "Ghanshyam Bhattarai "
                     ),
-                    from_email=EMAIL_HOST_USER,
+                    from_email=settings.EMAIL_HOST_USER,
                     recipient_list=[self.email],
                     fail_silently=True,
                 )
