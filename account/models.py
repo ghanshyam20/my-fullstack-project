@@ -20,9 +20,9 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     is_staff=models.BooleanField(default=False)
     date_joined=models.DateTimeField(default=timezone.now)
 
-    writer_reason = models.TextField()
+    writer_reason = models.TextField(blank=True)
     consent_given=models.BooleanField(default=False) # models for consent by default it is fasle unless user hit the content buton
-    consent_timestamp=models.DateTimeField(auto_now_add=True)
+    consent_timestamp=models.DateTimeField(null=True, blank=True)
     is_writer=models.BooleanField(default=False)
     is_writer_requested=models.BooleanField(default=False)
 
@@ -41,7 +41,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     def save(self, *args, **kwargs):
 
         if self.pk:
-            old_user = CustomUser.objects.get(pk=self.pk)
+            old_user = CustomUser.objects.get(pk=self.pk).first()
         else:
             old_user = None
 
@@ -64,7 +64,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
                     ),
                     from_email=EMAIL_HOST_USER,
                     recipient_list=[self.email],
-                    fail_silently=False,
+                    fail_silently=True,
                 )
 
         

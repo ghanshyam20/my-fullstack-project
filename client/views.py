@@ -1,8 +1,11 @@
+
+
+
+
 import requests
 from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
-from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,8 +14,19 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from client.models import Subscription
-from django.shortcuts import render
 from django.db.models import Q, Case, When, IntegerField
+from client.models import ArticleView
+from django.db import transaction
+from client.models import Payment
+import logging
+logger = logging.getLogger(__name__)
+
+
+def is_writer_only(request):
+    return request.user.is_writer and not request.user.is_staff
+
+def is_client_only(request):
+    return not request.user.is_writer and not request.user.is_staff
 
 
 #for the client 
@@ -24,25 +38,36 @@ from django.db.models import Q, Case, When, IntegerField
 
 
 def get_paypal_token():
-    url = f"{settings.PAYPAL_BASE_URL}/v1/oauth2/token"
+    try:
+        url=f"{settings.PAYPAL_BASE_URL}/v1/oauth2/token"
+        response = requests.post(
+            url,
+            auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_SECRET),
+            data={"grant_type": "client_credentials"},
+            timeout=5
+        )
 
-    response = requests.post(
-        url,
-        auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_SECRET),
-        data={"grant_type": "client_credentials"},
-        timeout=5
-    )
-    data=response.json()
-    print("PAYPAL TOKEN RESPONSE:", data)
+        response.raise_for_status()  # will raise an error for bad status codes
 
-    return response.json()['access_token']
+        data=response.json()
+
+        if "access_token" not in data:
+            logger.error(f"Invalid PayPal token response: {data}")
+            return None
+        return data.get('access_token')
+    
+    except requests.RequestException as e:
+        logger.error(f"Request error: {e}")
+        return None
 
 
 @login_required(login_url='my-login')
 def client_dashboard(request):
+    if is_writer_only(request):
+        return redirect('writer-dashboard')
     query = request.GET.get('q', '').strip()
 
-    articles = Article.objects.all()
+    articles = Article.objects.select_related('user').filter(is_published=True)
 
     if query:
         terms = query.split()
@@ -76,11 +101,16 @@ def client_dashboard(request):
 
 @login_required(login_url='my-login')
 def article_detail(request, id):
+    if is_writer_only(request):
+        return redirect('writer-dashboard')
     article = get_object_or_404(Article, id=id)
+    
+
+
     comments=Comment.objects.filter(
         article=article,
         parent=None
-        ).select_related('user').prefetch_related('replies').order_by('-date_posted')
+        ).select_related('user').prefetch_related('replies__user').order_by('-date_posted')
     
 
     is_bookmarked=Bookmark.objects.filter(
@@ -91,14 +121,18 @@ def article_detail(request, id):
 
     subscription=getattr(request.user, 'subscription', None)
 
+    can_access=True
+    
 
-    if article.is_premium:
-        if subscription and subscription.is_valid():
-            can_access=True
-        else:
+
+
+    if article.is_premium and not request.user.is_staff:
+        if not subscription or not subscription.is_valid():
             can_access=False
-    else:
-        can_access=True
+
+       
+    ArticleView.objects.get_or_create(user=request.user, article=article)
+    
 
 
     return render(request, 'client/article_detail.html', {
@@ -106,7 +140,7 @@ def article_detail(request, id):
         'comments': comments,
         'is_bookmarked': is_bookmarked,
         'can_access': can_access
-    })
+        })
 
 
 
@@ -122,7 +156,10 @@ def article_detail(request, id):
     
 
 @login_required
+@require_POST
 def toggle_like(request, article_id):
+    if is_writer_only(request):
+        return JsonResponse({"error": "Access denied."}, status=403)
     article = get_object_or_404(Article, id=article_id)
 
     like = Like.objects.filter(
@@ -153,13 +190,15 @@ def toggle_like(request, article_id):
 
 
 @login_required
+@require_POST
 def add_comment(request, article_id):
+    if is_writer_only(request):
+        return redirect('writer-dashboard')
     article = get_object_or_404(Article, id=article_id)
 
-    if request.method == 'POST':
-        content = request.POST.get('content')
+    content = request.POST.get('content', '').strip()
 
-        if content:
+    if content:
             Comment.objects.create(
                 user=request.user,
                 article=article,
@@ -167,11 +206,16 @@ def add_comment(request, article_id):
             )
             messages.success(request, "Comment added successfully.")
 
+    else:
+        messages.error(request, "Comment cannot be empty.")
+
     return redirect('article-detail', id=article.id)
 
 
 @login_required
 def delete_comment(request, comment_id):
+    if is_writer_only(request):
+        return redirect('writer-dashboard')
 
     comment = get_object_or_404(Comment, id=comment_id)
 
@@ -190,6 +234,8 @@ def delete_comment(request, comment_id):
 @require_POST
 
 def edit_comment(request, comment_id):
+    if is_writer_only(request):
+        return JsonResponse({"error": "Access denied."}, status=403)
 
     comment= get_object_or_404(Comment, id=comment_id)
 
@@ -223,6 +269,8 @@ def edit_comment(request, comment_id):
 @login_required
 @require_POST
 def toggle_bookmark(request, article_id):
+    if is_writer_only(request):
+        return JsonResponse({"error": "Access denied."}, status=403)
     article = get_object_or_404(Article, id=article_id)
 
     existing = Bookmark.objects.filter(
@@ -253,24 +301,32 @@ def toggle_bookmark(request, article_id):
    
 
 @login_required
+@require_POST
 def report_article(request, article_id):
+    if is_writer_only(request):
+        return JsonResponse({"error": "Access denied."}, status=403)
     article = get_object_or_404(Article, id=article_id)
 
-    if request.method == "POST":
-        reason = request.POST.get('reason')
+    
+    reason = request.POST.get('reason','').strip()
+    if not reason:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Reason is required.'
+        }, status=400)      
 
-        report, created = Report.objects.get_or_create(
+    report, created = Report.objects.get_or_create(
             user=request.user,
             article=article,
             defaults={'reason': reason}
         )
 
-        if not created:
+    if not created:
             return JsonResponse({
                 'status': 'already_reported'
             })
 
-        return JsonResponse({
+    return JsonResponse({
             'status': 'reported'
         })
     
@@ -280,8 +336,9 @@ def report_article(request, article_id):
 def subscription_page(request):
 
     # this will block writers
-    if request.user.is_writer:
+    if is_writer_only(request):
         return redirect('writer-dashboard')
+        
     
     next_url = request.GET.get('next')
 
@@ -291,8 +348,13 @@ def subscription_page(request):
 
 @login_required
 def create_paypal_order(request):
+    if is_writer_only(request):
+        return redirect('writer-dashboard')
 
     token = get_paypal_token()
+    if not token:
+        messages.error(request, "Unable to connect to payment gateway.")
+        return redirect('client-dashboard')
 
     url = f"{settings.PAYPAL_BASE_URL}/v2/checkout/orders"
 
@@ -322,18 +384,36 @@ def create_paypal_order(request):
         timeout=5
     )
 
+    if response.status_code not in [200, 201]:
+        messages.error(request, "Payment service error. Please try again later.")
+        return redirect('client-dashboard')
+
+
+    
+
+ 
+    
+        
+
     order = response.json()
 
     #  redirect user to paypal  approval url 
-    for link in order['links']:
-        if link['rel'] == 'approve':
-            return redirect(link['href'])
+    for link in order.get('links', []):
+        if link.get('rel') == 'approve':
+            return redirect(link.get('href'))
+        
+    messages.error(request, "Unable to redirect to PayPal.")
+    return redirect('client-dashboard')
+        
+
         
 
 
 
 @login_required
 def payment_success(request):
+    if is_writer_only(request):
+        return redirect('writer-dashboard')
 
     order_id = request.GET.get("token")
     next_url = request.GET.get("next", "client-dashboard")
@@ -341,9 +421,19 @@ def payment_success(request):
     if not order_id:
         messages.error(request, "Missing PayPal token.")
         return redirect('client-dashboard')
+    
+
+    if Payment.objects.filter(paypal_order_id=order_id).exists():
+        messages.warning(request, "This payment has already been processed.")
+        return redirect(next_url)
+    
+    data=None
 
     try:
         token = get_paypal_token()
+        if not token:
+            messages.error(request, "payment service unavailable.")
+            return redirect('client-dashboard')
 
         url = f"{settings.PAYPAL_BASE_URL}/v2/checkout/orders/{order_id}/capture"
 
@@ -356,63 +446,157 @@ def payment_success(request):
             timeout=5
         )
 
-        data = response.json()
-        print("PAYPAL RESPONSE:", data)
+        if response.status_code not in [200, 201]:
+            messages.error(request, "Payment capture failed. Please try again.")
+            return redirect('client-dashboard')
 
-    except Exception as e:
-        print("PAYMENT ERROR:", e)
-        messages.error(request, "Payment processing failed.")
+       
+
+        data = response.json()
+
+        try:
+            amount_paid = data["purchase_units"][0]["payments"]["captures"][0]["amount"]["value"]
+            currency = data["purchase_units"][0]["payments"]["captures"][0]["amount"]["currency_code"]
+        except (KeyError, IndexError):
+            logger.error(f"Invalid PayPal structure: {data}")
+            messages.error(request, "Invalid payment data.")
+            return redirect('client-dashboard')
+
+
+        if currency != "USD":
+            messages.error(request, "Invalid currency.")
+            return redirect('client-dashboard')
+
+     
+        
+
+        try:
+            if float(amount_paid) != 4.99:
+                messages.error(request, "Invalid payment amount.")
+                return redirect('client-dashboard')
+        except ValueError:
+                messages.error(request, "Invalid payment format.")
+                return redirect('client-dashboard')
+
+       
+
+       
+        
+
+
+        #print("PAYPAL RESPONSE:", data)
+        if data.get("id")!= order_id:
+            messages.error(request, "Order ID mismatch.")
+            return redirect('client-dashboard')
+        
+
+        payer=data.get("payer")
+        if not payer:
+            messages.error(request,"Invalid payer")
+            return redirect('client-dashboard')
+        
+        payer_email=payer.get("email_address")
+
+    except requests.Timeout:
+        messages.error(request, "Payment timeout. Try again.")
         return redirect('client-dashboard')
 
-    #  handle response and activate subscription if payment completed
-    payment_completed = (
-        data.get("status") == "COMPLETED" or
-        data.get("name") == "UNPROCESSABLE_ENTITY"  # already captured
-    )
+    except Exception as e:
+        logger.error(f"Payment error: {str(e)}")
+        messages.error(request, "Payment processing failed.")
+        return redirect('client-dashboard')
+    
+
+    if not data:
+        messages.error(request, "Invalid payment data received.")
+        return redirect('client-dashboard')
+    payment_completed= data.get("status") == "COMPLETED"
+
 
     if payment_completed:
+        with transaction.atomic():
+            if Payment.objects.select_for_update().filter(paypal_order_id=order_id).exists():
+                return redirect(next_url)
 
-        sub, _ = Subscription.objects.get_or_create(user=request.user)
+            sub, _ = Subscription.objects.get_or_create(user=request.user)
 
-        #  prevent resetting if already active
-        if not sub.is_valid():
+      
             sub.plan = "PREMIUM"
             sub.is_active = True
             sub.cost = 4.99
-            sub.expires_at = timezone.now() + timedelta(days=30)
+            if sub.expires_at and sub.expires_at > timezone.now():
+                sub.expires_at += timedelta(days=30)
+            else:
+                sub.expires_at = timezone.now() + timedelta(days=30)
             sub.save()
+            logger.info(f"Subscription updated: user={request.user.id}, expires={sub.expires_at}")
 
-        # success message
-        messages.success(request, " Payment successful! Premium unlocked")
+            Payment.objects.get_or_create(
+                paypal_order_id=order_id,
+                defaults={
+                "user": request.user,
+                "subscription": sub,
+                "status": "COMPLETED",
+                "amount": sub.cost
+            }
+        )
 
-        #email send 
+        messages.success(request, "Payment successful! Premium unlocked.")
+
+        logger.info(f"Payment SUCCESS: user={request.user.id}, order={order_id}")
+
+
+    
+        
+
         try:
             send_mail(
-                subject=" Your Premium Subscription is Activated ",
+                subject="Your Premium Subscription is Activated",
                 message=(
-                        f"Hi {request.user.first_name or 'User'},\n\n"
-                        f"Your Premium subscription is now active.\n\n"
-                        f"Plan: Premium\n"
-                        f"Price: €4.99/month\n"
-                        f"Expires on: {sub.expires_at.strftime('%B %d, %Y')}\n\n"
-                        f"You now have full access to all premium content.\n\n"
-                        f"Thank you for your purchase!\n"
-                        f"- InsightHub Team"
-                    ),
-                
-                    
-               
+                    f"Hi {request.user.first_name or 'User'},\n\n"
+                    f"Your Premium subscription is now active.\n\n"
+                    f"Plan: Premium\n"
+                    f"Price: €4.99/month\n"
+                    f"Expires on: {sub.expires_at.strftime('%B %d, %Y')}\n\n"
+                    f"You now have full access to all premium content.\n\n"
+                    f"Thank you for your purchase!\n"
+                    f"- InsightHub Team"
+                ),
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[request.user.email],
                 fail_silently=True
             )
         except Exception as e:
-            print("EMAIL ERROR:", e)
+            pass#print("EMAIL ERROR:", e)
+
+
+    #  handle response and activate subscription if payment completed
+   
+
+        #email send 
+        
+                
+                    
+               
+             
 
     else:
+        amount=4.99
+        Payment.objects.get_or_create(
+            paypal_order_id=order_id,
+            defaults={
+                "user": request.user,
+                "subscription": None,
+                "status": "FAILED",
+                "amount": amount
+            }
+        )
+        logger.warning(f"Payment not completed for order {order_id}. Response: {data}")
         messages.error(request, "Payment not completed.")
 
-    return redirect(next_url)
+    return redirect(next_url or 'client-dashboard')
+
+
 @login_required
 def payment_cancel(request):
     messages.warning(request, "Payment cancelled.")

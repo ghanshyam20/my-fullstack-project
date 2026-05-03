@@ -37,7 +37,11 @@
 {% if user.is_authenticated %}
     <div class="dropdown">
         <button class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown">
-            {{ user.first_name|default:user.email }}
+              {% if user.first_name and user.first_name|length > 0 %}
+                {{ user.first_name }}
+              {% else %}
+                {{ user.email }}
+              {% endif %}
         </button>
        <ul class="dropdown-menu dropdown-menu-end">
 

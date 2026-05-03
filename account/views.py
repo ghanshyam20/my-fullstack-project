@@ -16,6 +16,7 @@ from writer.models import Article
 from django.contrib.messages import get_messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
+from django.db import transaction
 
 import logging
 
@@ -534,6 +535,29 @@ def verify_reset_otp(request, user_id):
 
 
 
+@login_required
+def delete_account(request):
+    if request.method == "POST":
+        user = request.user
+
+        try:
+            with transaction.atomic():
+
+                # delete user-related data
+                Article.objects.filter(user=user).delete()
+
+                # delete user (this will also delete related models if CASCADE)
+                user.delete()
+
+            messages.success(request, "Account deleted successfully.")
+            return redirect('')
+
+        except Exception as e:
+            print("DELETE ERROR:", e)
+            messages.error(request, "Something went wrong. Try again.")
+            return redirect('profile-page')
+
+    return redirect('profile-page')
 
 
     
