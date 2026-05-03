@@ -65,7 +65,8 @@
     <!-- header -->
     <div class="mb-4">
         <h3 class="fw-bold">
-            Welcome back, {{ request.user.first_name|default:"User" }} 👋
+            Welcome back, {{ request.user.first_name|default:"User" }} 
+            <i class="bi bi-emoji-smile"></i>
         </h3>
 
         <p class="text-muted">Pick an article and keep learning.</p>
@@ -129,6 +130,24 @@
                     <p class="article-date">
                         {{ article.date_posted|date:"M d, Y" }}
                     </p>
+
+                    <div class="d-flex gap-3 small text-muted mb-2">
+
+                        <span>
+                            <i class="bi bi-heart"></i> {{ article.total_likes }}
+                        </span>
+
+                        <span>
+                            <i class="bi bi-bookmark"></i> {{ article.total_bookmarks }}
+                        </span>
+
+                        <span>
+                            <i class="bi bi-eye"></i> {{ article.total_views }}
+                        </span>
+
+                        </div>
+
+
 
                  
                     <p class="article-text flex-grow-1">

@@ -16,7 +16,7 @@ class Article(models.Model):
     category=models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} by {self.user.email}"
     
 
 class ArticleImage(models.Model):
@@ -25,7 +25,7 @@ class ArticleImage(models.Model):
     image = models.ImageField(upload_to='articles/')
 
     def __str__(self):
-        return f"Image for {self.article.title}"
+        return f"Image for {self.article.title} image"
     
 
 

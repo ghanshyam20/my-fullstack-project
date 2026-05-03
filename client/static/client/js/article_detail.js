@@ -23,22 +23,49 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // for like 
-    likeBtn?.addEventListener("click", async () => {
-        const res = await fetch(likeBtn.dataset.url);
-        const data = await res.json();
-        document.getElementById("like-count").innerText = data.total_likes;
-        showToast("Liked");
+
+
+
+  likeBtn?.addEventListener("click", async () => {
+    const res = await fetch(likeBtn.dataset.url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken()
+        }
     });
 
-    // for save
-    bookmarkBtn?.addEventListener("click", async () => {
-        await fetch(bookmarkBtn.dataset.url, {
-            method: "POST",
-            headers: { "X-CSRFToken": getCSRFToken() }
-        });
-        showToast("Saved");
+    const data = await res.json();
+
+    document.getElementById("like-count").innerText = data.total_likes;
+    document.getElementById("like-count-display").innerText = data.total_likes;
+
+    showToast(data.liked ? "Liked" : "Unliked");
+});
+
+
+
+ bookmarkBtn?.addEventListener("click", async () => {
+    const res = await fetch(bookmarkBtn.dataset.url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken()
+        }
     });
+
+    const data = await res.json();
+    document.getElementById("bookmark-count").innerText = data.total_bookmarks;
+    document.getElementById("bookmark-count-display").innerText = data.total_bookmarks;
+    showToast(data.bookmarked ? "Saved" : "Removed");
+
+    // toggel boomark 
+    if (data.bookmarked) {
+        bookmarkBtn.classList.add("btn-warning");
+        bookmarkBtn.classList.remove("btn-outline-warning");
+    } else {
+        bookmarkBtn.classList.remove("btn-warning");
+        bookmarkBtn.classList.add("btn-outline-warning");
+    }
+});
 
     // comment toggle
     document.getElementById("comment-toggle")?.addEventListener("click", () => {

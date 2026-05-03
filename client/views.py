@@ -2,6 +2,7 @@
 
 
 
+from django.db import models
 import requests
 from django.conf import settings
 from datetime import timedelta
@@ -18,6 +19,8 @@ from django.db.models import Q, Case, When, IntegerField
 from client.models import ArticleView
 from django.db import transaction
 from client.models import Payment
+
+from django.db.models import Count 
 import logging
 logger = logging.getLogger(__name__)
 
@@ -69,7 +72,14 @@ def client_dashboard(request):
         return redirect('writer-dashboard')
     query = request.GET.get('q', '').strip()
 
-    articles = Article.objects.select_related('user').filter(is_published=True)
+    articles = Article.objects.select_related('user').annotate(
+        total_likes=Count('like_set'),
+        total_bookmarks=Count('bookmark_set'),
+        total_views=Count('articleview_set'),
+        
+
+    
+    ).filter(is_published=True)
 
     if query:
         terms = query.split()
@@ -106,6 +116,12 @@ def article_detail(request, id):
     if is_writer_only(request):
         return redirect('writer-dashboard')
     article = get_object_or_404(Article, id=id)
+
+    ArticleView.objects.get_or_create(user=request.user, article=article)
+
+    total_likes = Like.objects.filter(article=article).count()
+    total_bookmarks = Bookmark.objects.filter(article=article).count()
+    total_views= ArticleView.objects.filter(article=article).count()
     
 
 
@@ -133,7 +149,7 @@ def article_detail(request, id):
             can_access=False
 
        
-    ArticleView.objects.get_or_create(user=request.user, article=article)
+    
     
 
 
@@ -141,7 +157,10 @@ def article_detail(request, id):
         'article': article,
         'comments': comments,
         'is_bookmarked': is_bookmarked,
-        'can_access': can_access
+        'can_access': can_access,
+        'total_likes': total_likes,
+        'total_bookmarks': total_bookmarks,
+        'total_views': total_views,
         })
 
 

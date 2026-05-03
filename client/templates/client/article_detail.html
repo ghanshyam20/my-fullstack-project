@@ -57,13 +57,13 @@
             <button id="like-btn"
                 data-url="{% url 'toggle-like' article.id %}"
                 class="btn btn-outline-primary">
-                Like <span id="like-count">{{ article.like_set.count }}</span>
+                Like <span id="like-count">{{ total_likes }}</span>
             </button>
 
             <button id="bookmark-btn"
                 data-url="{% url 'toggle-bookmark' article.id %}"
                 class="btn btn-outline-warning">
-                Save
+                Save <span id="bookmark-count">{{ total_bookmarks }}</span>
             </button>
 
             <button id="comment-toggle"
@@ -76,6 +76,22 @@
                 data-bs-target="#reportModal">
                 Report
             </button>
+
+        </div>
+
+        <div class="mt-2 small text-muted d-flex gap-3 align-items-center">
+
+            <span>
+                <i class="bi bi-heart"></i> <span id="like-count-display">{{ total_likes }}</span>
+            </span>
+
+            <span>
+                <i class="bi bi-bookmark"></i> <span id="bookmark-count-display">{{ total_bookmarks }}</span>
+            </span>
+
+            <span>
+                <i class="bi bi-eye"></i> {{ total_views }}
+            </span>
 
         </div>
 
