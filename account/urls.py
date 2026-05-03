@@ -19,5 +19,7 @@ urlpatterns=[
     path('forgot-password/', views.forgot_password, name='forgot-password'),
     path('reset-verify/<int:user_id>/', views.verify_reset_otp, name='reset-verify'),
     path('reset-password/<int:user_id>/', views.reset_password, name='reset-password'),
+    path('about/', views.about, name='about'),
+    path('contact/', views.contact, name='contact'),
 
     ]
