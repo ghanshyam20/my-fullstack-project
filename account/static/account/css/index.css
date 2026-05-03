@@ -1,4 +1,4 @@
-/* BASE */
+/* base */
 body {
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 18px;
@@ -7,7 +7,7 @@ body {
   color: #212529;
 }
 
-/* HEADINGS */
+/* headings */
 h1 {
   font-size: 3rem;
   font-weight: 700;
