@@ -109,3 +109,29 @@ function getCSRFToken() {
         .find(row => row.startsWith('csrftoken'))
         ?.split('=')[1];
 }
+
+//filter logic 
+const filterSelect = document.getElementById("filterSelect");
+
+if (filterSelect) {
+
+    const params = new URLSearchParams(window.location.search);
+    const currentType = params.get("type");
+
+    if (currentType) {
+        filterSelect.value = currentType;
+    }
+
+    filterSelect.addEventListener("change", function () {
+        const value = this.value;
+        const url = new URL(window.location.href);
+
+        if (value === "latest") {
+            url.searchParams.delete("type");
+        } else {
+            url.searchParams.set("type", value);
+        }
+
+        window.location.href = url.toString();
+    });
+}
