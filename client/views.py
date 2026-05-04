@@ -763,9 +763,9 @@ def protected_image(request, image_id):
             return HttpResponseForbidden("You need a premium subscription to view this image.",status=403)
         
 
-    storage=S3Boto3Storage()
-    url=storage.url(image.image.name)
+    #storage=S3Boto3Storage()
+    #url=storage.url(image.image.name)
         
 
-    return redirect(url)
-       
+    return redirect(image.image.url)
+    
