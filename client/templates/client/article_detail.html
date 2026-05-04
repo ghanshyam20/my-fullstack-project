@@ -32,8 +32,8 @@
                 {% else %}
                     
                         <!--lcoked image  -->
-                        <img src="{% url  'protected-image' img.id %}"
-                             class="article-img clickable-img"
+                        <img src="{{ img.image.url }}"
+                             class="article-img clickable-img blur-img"
                              data-locked="true">
 
                         <div class="img-overlay">Premium</div>
