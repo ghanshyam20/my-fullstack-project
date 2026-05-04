@@ -17,5 +17,6 @@ urlpatterns=[
     path('create-order/', views.create_paypal_order, name='create-order'),
     path('payment-success/', views.payment_success, name='payment-success'),
     path('payment-cancel/', views.payment_cancel, name='payment-cancel'),
+    path('protected-image/<int:image_id>/', views.protected_image, name='protected-image'),
    
 ]
