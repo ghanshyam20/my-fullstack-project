@@ -1,7 +1,3 @@
-
-
-
-
 from django.db import models
 import requests
 from django.conf import settings
@@ -10,7 +6,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
-from client.models import Article, Like ,Comment,Bookmark,Report
+from client.models import Article, Like ,Comment,Bookmark, Notification,Report
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
@@ -72,14 +68,16 @@ def client_dashboard(request):
         return redirect('writer-dashboard')
     query = request.GET.get('q', '').strip()
 
-    articles = Article.objects.select_related('user').annotate(
-        total_likes=Count('like_set'),
-        total_bookmarks=Count('bookmark_set'),
-        total_views=Count('articleview_set'),
+    articles = Article.objects.select_related('user').prefetch_related('images').annotate(
+        total_likes=Count('likes', distinct=True),
+        total_bookmarks=Count('bookmarks', distinct=True),
+        total_views=Count('article_views', distinct=True)   
+        
+    ).filter(is_published=True)
         
 
     
-    ).filter(is_published=True)
+   
 
     if query:
         terms = query.split()
@@ -115,14 +113,43 @@ def client_dashboard(request):
 def article_detail(request, id):
     if is_writer_only(request):
         return redirect('writer-dashboard')
-    article = get_object_or_404(Article, id=id)
-
-    ArticleView.objects.get_or_create(user=request.user, article=article)
-
-    total_likes = Like.objects.filter(article=article).count()
-    total_bookmarks = Bookmark.objects.filter(article=article).count()
-    total_views= ArticleView.objects.filter(article=article).count()
     
+    article = get_object_or_404(Article.objects.annotate(
+        total_likes=Count('likes', distinct=True),
+        total_bookmarks=Count('bookmarks', distinct=True),
+        total_views=Count('article_views', distinct=True)   
+    ), id=id, is_published=True
+    )
+
+
+    # i have added view track  for recetn view and count as view new
+
+
+    recent_view=ArticleView.objects.filter(
+        user=request.user,
+        article=article,
+        viewed_at__gte=timezone.now() - timedelta(minutes=2)
+        
+        ).exists()
+    
+    if not recent_view:
+        ArticleView.objects.create(
+            user=request.user,
+            article=article
+        )
+
+    # this wrill refetch new update 
+    article=Article.objects.annotate(
+        total_likes=Count('likes', distinct=True),
+        total_bookmarks=Count('bookmarks', distinct=True),
+        total_views=Count('article_views', distinct=True)   
+    ).get(id=id)
+
+   
+
+    total_likes=article.total_likes
+    total_bookmarks=article.total_bookmarks
+    total_views=article.total_views
 
 
     comments=Comment.objects.filter(
@@ -183,20 +210,17 @@ def toggle_like(request, article_id):
         return JsonResponse({"error": "Access denied."}, status=403)
     article = get_object_or_404(Article, id=article_id)
 
-    like = Like.objects.filter(
+    like,created=Like.objects.get_or_create(
         user=request.user,
         article=article
     )
-
-    if like.exists():
+    if not created:
         like.delete()
-        liked = False
+        liked=False
     else:
-        Like.objects.create(
-            user=request.user,
-            article=article
-        )
-        liked = True
+        liked=True
+
+   
 
     total_likes = Like.objects.filter(article=article).count()
 
@@ -294,20 +318,19 @@ def toggle_bookmark(request, article_id):
         return JsonResponse({"error": "Access denied."}, status=403)
     article = get_object_or_404(Article, id=article_id)
 
-    existing = Bookmark.objects.filter(
+    bookmark,created = Bookmark.objects.get_or_create(  
         user=request.user,
         article=article
+
     )
 
-    if existing.exists():
-        existing.delete()
-        bookmarked = False
+    if not created:
+        bookmark.delete()
+        bookmarked=False
     else:
-        Bookmark.objects.create(
-            user=request.user,
-            article=article
-        )
-        bookmarked = True
+        bookmarked=True
+
+    
 
     total = Bookmark.objects.filter(article=article).count()
 
@@ -444,10 +467,14 @@ def payment_success(request):
         return redirect('client-dashboard')
     
 
-    if Payment.objects.filter(paypal_order_id=order_id).exists():
-        messages.warning(request, "This payment has already been processed.")
+
+    if Payment.objects.filter(paypal_order_id=order_id, status="COMPLETED").exists():
+        messages.warning(request, "payment  has already been processed.")
         return redirect(next_url)
     
+
+
+
     data=None
 
     try:
@@ -518,6 +545,10 @@ def payment_success(request):
         
         payer_email=payer.get("email_address")
 
+        if not payer_email:
+            messages.error(request,"Payer email not found.")
+            return redirect('client-dashboard')
+
     except requests.Timeout:
         messages.error(request, "Payment timeout. Try again.")
         return redirect('client-dashboard')
@@ -531,8 +562,29 @@ def payment_success(request):
     if not data:
         messages.error(request, "Invalid payment data received.")
         return redirect('client-dashboard')
-    payment_completed= data.get("status") == "COMPLETED"
+    
 
+    capture_status=(
+        data.get("purchase_units", [{}])[0]
+        .get("payments", {})
+        .get("captures", [{}])[0]
+        .get("status","")
+
+    )
+    
+
+    if not capture_status:
+        messages.error(request, "Payment status not found.")
+        return redirect('client-dashboard')
+   
+
+    payment_completed =(
+        data.get("status") == "COMPLETED" and
+        capture_status.upper() == "COMPLETED"
+        )
+
+    
+       
 
     if payment_completed:
         with transaction.atomic():
@@ -545,6 +597,7 @@ def payment_success(request):
             sub.plan = "PREMIUM"
             sub.is_active = True
             sub.cost = 4.99
+
             if sub.expires_at and sub.expires_at > timezone.now():
                 sub.expires_at += timedelta(days=30)
             else:
@@ -558,13 +611,25 @@ def payment_success(request):
                 "user": request.user,
                 "subscription": sub,
                 "status": "COMPLETED",
-                "amount": sub.cost
-            }
-        )
+                "amount": sub.cost,
+                "payer_email": payer_email
+                }
+            )
+            
+        #notify user
+        
 
-        messages.success(request, "Payment successful! Premium unlocked.")
+            Notification.objects.create(
+                        user=request.user,
+                        message="Your Premium subscription is now active. Enjoy our exclusive Tech content!",
+                        type="PAYMENT"
+            )
+            
+            messages.success(request, "Payment successful! Premium unlocked.")
 
-        logger.info(f"Payment SUCCESS: user={request.user.id}, order={order_id}")
+            logger.info(
+            f"Payment SUCCESS: user={request.user.id}, order={order_id},email={payer_email}"
+            )
 
 
     
@@ -589,7 +654,7 @@ def payment_success(request):
             )
         except Exception as e:
             logger.error(f"Error sending email: {str(e)}")
-           
+            messages.error(request, "Failed to send confirmation email.")
 
 
     #  handle response and activate subscription if payment completed

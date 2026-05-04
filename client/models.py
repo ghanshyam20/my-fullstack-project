@@ -12,7 +12,7 @@ class Subscription(models.Model):
         ("PREMIUM", "Premium"),
     ]
 
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE,related_name='subscription')
     plan = models.CharField(max_length=20, choices=PLAN_CHOICES, default="FREE")
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     is_active = models.BooleanField(default=False)
@@ -29,7 +29,7 @@ class Subscription(models.Model):
 
     def remaining_days(self):
         if self.expires_at:
-            return (self.expires_at - timezone.now()).days
+            return max((self.expires_at - timezone.now()).days,0)
         return 0
 
     def __str__(self):
@@ -39,6 +39,7 @@ class Subscription(models.Model):
         indexes = [
             models.Index(fields=["user", "is_active"]),
             models.Index(fields=["expires_at"]),
+            models.Index(fields=["created_at"]),
         ]
 
 
@@ -51,7 +52,7 @@ class Payment(models.Model):
         ("FAILED", "Failed"),
     ]
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='payments')
     subscription = models.ForeignKey(Subscription, on_delete=models.SET_NULL, null=True, blank=True)
 
     paypal_order_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
@@ -59,6 +60,7 @@ class Payment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
     amount = models.DecimalField(max_digits=6, decimal_places=2)
     payment_date = models.DateTimeField(auto_now_add=True)
+    payer_email = models.EmailField(null=True, blank=True)
 
     def is_successful(self):
         return self.status == "COMPLETED"
@@ -70,6 +72,9 @@ class Payment(models.Model):
         indexes = [
             models.Index(fields=["paypal_order_id"]),
             models.Index(fields=["user", "payment_date"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["payer_email"]),
+            
         ]
         ordering = ["-payment_date"]
 
@@ -77,8 +82,8 @@ class Payment(models.Model):
 # comment 
 
 class Comment(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='user_comments')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE,related_name='article_comments')
 
     content = models.TextField()
 
@@ -106,8 +111,8 @@ class Comment(models.Model):
 # like 
 
 class Like(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='user_likes')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE,related_name='article_likes')
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -126,8 +131,8 @@ class Like(models.Model):
 # Bookmark 
 
 class Bookmark(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='user_bookmarks')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE,related_name='article_bookmarks')
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -146,8 +151,8 @@ class Bookmark(models.Model):
 # article view
 
 class ArticleView(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='user_views')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE,related_name='article_views')
 
     viewed_at = models.DateTimeField(auto_now_add=True)
 
@@ -164,8 +169,8 @@ class ArticleView(models.Model):
 # report 
 
 class Report(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='user_reports')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE,related_name='article_reports')
 
     reason = models.TextField()  # upgraded
     created_at = models.DateTimeField(auto_now_add=True)
@@ -176,6 +181,9 @@ class Report(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['user', 'article'], name='unique_report')
+        ]
+        indexes = [
+            models.Index(fields=['article', 'created_at']),
         ]
 
 
@@ -188,7 +196,7 @@ class Notification(models.Model):
         ("PAYMENT", "Payment"),
     ]
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='notifications')
 
     message = models.CharField(max_length=255)
     link = models.CharField(max_length=255, blank=True, null=True)
@@ -203,3 +211,6 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_read']),
+        ]
