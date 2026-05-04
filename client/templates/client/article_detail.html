@@ -18,143 +18,148 @@
 
     <div class="card article-card shadow-sm">
 
-        <!-- for image grid -->
+        <!-- image grid  -->
         {% if article.images.all %}
         <div class="image-grid">
+
             {% for img in article.images.all %}
             <div class="img-box">
 
-                <img src="{{ img.image.url }}"
-                     class="article-img clickable-img
-                     {% if not can_access and article.is_premium and forloop.counter > 2 %}blur-img{% endif %}"
-                     data-src="{{ img.image.url }}"
+                {% if can_access %}
+                    <!-- full accss it gives  -->
+                    <img src="{{ img.image.url }}" class="article-img clickable-img">
 
-                     {% if not can_access and article.is_premium and forloop.counter > 2 %}
-                     data-locked="true"
-                     {% endif %}
-                >
+                {% else %}
+                    {% if article.is_premium and forloop.counter > 2 %}
+                        <!--lcoked image  -->
+                        <img src="{% static 'images/locked.jpg' %}"
+                             class="article-img clickable-img"
+                             data-locked="true">
 
-                {% if not can_access and article.is_premium and forloop.counter > 2 %}
-                <div class="img-overlay">Premium</div>
+                        <div class="img-overlay">Premium</div>
+                    {% else %}
+                        <!-- preview  -->
+                        <img src="{{ img.image.url }}" class="article-img clickable-img">
+                    {% endif %}
                 {% endif %}
 
             </div>
             {% endfor %}
+
         </div>
         {% endif %}
 
-    
-        <h2 class="article-title">{{ article.title }}</h2>
+        <!-- body  -->
+        <div class="card-body">
 
-        <!-- meta -->
-        <p class="article-meta">
-            {{ article.user.first_name|default:article.user.email }} · {{ article.date_posted|date:"M d, Y" }}
-        </p>
+         
+            <h2 class="article-title">{{ article.title }}</h2>
 
-        <!-- actions -->
-        <div class="action-bar">
+            
+            <p class="article-meta">
+                {{ article.user.first_name|default:article.user.email }} · {{ article.date_posted|date:"M d, Y" }}
+            </p>
 
-            <button id="like-btn"
-                data-url="{% url 'toggle-like' article.id %}"
-                class="btn btn-outline-primary">
-                Like <span id="like-count">{{ total_likes }}</span>
-            </button>
+        
+            <div class="action-bar">
 
-            <button id="bookmark-btn"
-                data-url="{% url 'toggle-bookmark' article.id %}"
-                class="btn btn-outline-warning">
-                Save <span id="bookmark-count">{{ total_bookmarks }}</span>
-            </button>
+                <button id="like-btn"
+                    data-url="{% url 'toggle-like' article.id %}"
+                    class="btn btn-outline-primary">
+                    Like <span id="like-count">{{ total_likes }}</span>
+                </button>
 
-            <button id="comment-toggle"
-                class="btn btn-outline-secondary">
-                Comment
-            </button>
+                <button id="bookmark-btn"
+                    data-url="{% url 'toggle-bookmark' article.id %}"
+                    class="btn btn-outline-warning">
+                    Save <span id="bookmark-count">{{ total_bookmarks }}</span>
+                </button>
 
-            <button class="btn btn-outline-danger"
-                data-bs-toggle="modal"
-                data-bs-target="#reportModal">
-                Report
-            </button>
+                <button id="comment-toggle"
+                    class="btn btn-outline-secondary">
+                    Comment
+                </button>
 
-        </div>
+                <button class="btn btn-outline-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#reportModal">
+                    Report
+                </button>
 
-        <div class="mt-2 small text-muted d-flex gap-3 align-items-center">
-
-            <span>
-                <i class="bi bi-heart"></i> <span id="like-count-display">{{ total_likes }}</span>
-            </span>
-
-            <span>
-                <i class="bi bi-bookmark"></i> <span id="bookmark-count-display">{{ total_bookmarks }}</span>
-            </span>
-
-            <span>
-                <i class="bi bi-eye"></i> {{ total_views }}
-            </span>
-
-        </div>
-
-        <!-- content  -->
-        {% if can_access %}
-            <div class="article-content">
-                {{ article.content|safe }}
-            </div>
-        {% else %}
-            <div class="article-content">
-                {{ article.content|striptags|truncatewords:60 }}
             </div>
 
-            <div class="premium-box">
-                Premium content locked
-                <br>
-             <a href="{% url 'subscription-page' %}?next={{ request.get_full_path|urlencode }}" 
-                class="btn btn-warning">
-                Upgrade
-            </a>
+            <!-- STATS -->
+            <div class="mt-2 small text-muted d-flex gap-3 align-items-center">
+                <span><i class="bi bi-heart"></i> {{ total_likes }}</span>
+                <span><i class="bi bi-bookmark"></i> {{ total_bookmarks }}</span>
+                <span><i class="bi bi-eye"></i> {{ total_views }}</span>
             </div>
-        {% endif %}
 
-        <!-- comment-->
-        <div id="comment-box" class="d-none mt-4">
-            <form id="comment-form" method="POST" action="{% url 'add-comment' article.id %}">
-                {% csrf_token %}
-                <textarea name="content" class="form-control mb-2" placeholder="Write your comment..." required></textarea>
-                <button class="btn btn-primary btn-sm">Post Comment</button>
-            </form>
-        </div>
-
-        <!-- comments  -->
-        <div class="comments-section mt-4">
-            <h6>Comments</h6>
-
-            {% for comment in comments %}
-            <div class="comment-box">
-
-                <div class="d-flex justify-content-between">
-                    <strong>{{ comment.user.first_name }}</strong>
-                    <small>{{ comment.date_posted|timesince }} ago</small>
+      
+            {% if can_access %}
+                <div class="article-content">
+                    {{ article.content|safe }}
+                </div>
+            {% else %}
+                <div class="article-content">
+                    {{ article.content|striptags|truncatewords:60 }}
                 </div>
 
-                <p id="comment-text-{{ comment.id }}">{{ comment.content }}</p>
-
-                {% if comment.user == request.user %}
-                <div class="comment-actions">
-                    <button onclick="editComment({{ comment.id }})" class="btn btn-sm btn-light">Edit</button>
-                    <button onclick="deleteComment({{ comment.id }})" class="btn btn-sm btn-danger">Delete</button>
+                <div class="premium-box">
+                    Premium content locked
+                    <br>
+                    <a href="{% url 'subscription-page' %}?next={{ request.get_full_path|urlencode }}" 
+                       class="btn btn-warning">
+                       Upgrade
+                    </a>
                 </div>
-                {% endif %}
+            {% endif %}
 
+            <!-- comment box -->
+            <div id="comment-box" class="d-none mt-4">
+                <form method="POST" action="{% url 'add-comment' article.id %}">
+                    {% csrf_token %}
+                    <textarea name="content" class="form-control mb-2"
+                        placeholder="Write your comment..." required></textarea>
+                    <button class="btn btn-primary btn-sm">Post Comment</button>
+                </form>
             </div>
-            {% empty %}
-            <p>No comments yet</p>
-            {% endfor %}
-        </div>
 
+            <!-- comments  -->
+            <div class="comments-section mt-4">
+                <h6>Comments</h6>
+
+                {% for comment in comments %}
+                <div class="comment-box">
+
+                    <div class="d-flex justify-content-between">
+                        <strong>{{ comment.user.first_name }}</strong>
+                        <small>{{ comment.date_posted|timesince }} ago</small>
+                    </div>
+
+                    <p id="comment-text-{{ comment.id }}">{{ comment.content }}</p>
+
+                    {% if comment.user == request.user %}
+                    <div class="comment-actions">
+                        <button onclick="editComment({{ comment.id }})"
+                                class="btn btn-sm btn-light">Edit</button>
+
+                        <button onclick="deleteComment({{ comment.id }})"
+                                class="btn btn-sm btn-danger">Delete</button>
+                    </div>
+                    {% endif %}
+
+                </div>
+                {% empty %}
+                <p>No comments yet</p>
+                {% endfor %}
+            </div>
+
+        </div>
     </div>
 </div>
 
-<!-- image model  -->
+<!-- image modal  -->
 <div class="modal fade" id="imageModal">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -178,7 +183,7 @@
   </div>
 </div>
 
-<!-- toast -->
+<!-- toast  -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   <div id="toast" class="toast text-bg-dark border-0">
     <div class="d-flex">
