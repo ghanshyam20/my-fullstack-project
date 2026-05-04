@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import IntegrityError
 import requests
 from django.conf import settings
 from datetime import timedelta
@@ -68,13 +68,13 @@ def client_dashboard(request):
         return redirect('writer-dashboard')
     query = request.GET.get('q', '').strip()
 
-    articles = Article.objects.select_related('user').prefetch_related('images').annotate(
-        total_likes=Count('likes', distinct=True),
-        total_bookmarks=Count('bookmarks', distinct=True),
-        total_views=Count('article_views', distinct=True)   
-        
+    articles = Article.objects.select_related('user') \
+        .prefetch_related('images', 'article_likes', 'article_bookmarks', 'article_views') \
+        .annotate(
+            total_likes=Count('article_likes', distinct=True),
+            total_bookmarks=Count('article_bookmarks', distinct=True),
+            total_views=Count('article_views', distinct=True)
     ).filter(is_published=True)
-        
 
     
    
@@ -114,13 +114,16 @@ def article_detail(request, id):
     if is_writer_only(request):
         return redirect('writer-dashboard')
     
-    article = get_object_or_404(Article.objects.annotate(
-        total_likes=Count('likes', distinct=True),
-        total_bookmarks=Count('bookmarks', distinct=True),
-        total_views=Count('article_views', distinct=True)   
-    ), id=id, is_published=True
+   
+    article = get_object_or_404(
+        Article.objects.annotate(
+            total_likes=Count('article_likes', distinct=True),
+            total_bookmarks=Count('article_bookmarks', distinct=True),
+            total_views=Count('article_views', distinct=True)
+        ),
+        id=id,
+        is_published=True
     )
-
 
     # i have added view track  for recetn view and count as view new
 
@@ -139,11 +142,7 @@ def article_detail(request, id):
         )
 
     # this wrill refetch new update 
-    article=Article.objects.annotate(
-        total_likes=Count('likes', distinct=True),
-        total_bookmarks=Count('bookmarks', distinct=True),
-        total_views=Count('article_views', distinct=True)   
-    ).get(id=id)
+
 
    
 
@@ -210,15 +209,31 @@ def toggle_like(request, article_id):
         return JsonResponse({"error": "Access denied."}, status=403)
     article = get_object_or_404(Article, id=article_id)
 
-    like,created=Like.objects.get_or_create(
-        user=request.user,
-        article=article
-    )
-    if not created:
-        like.delete()
-        liked=False
-    else:
+    try:
+        Like.objects.create(
+            user=request.user,
+            article=article
+        )
         liked=True
+
+        if article.user != request.user:
+            Notification.objects.create(
+            user=article.user,
+            message=f"{request.user.first_name or request.user.email} liked your article",
+            link=f"/client/article/{article.id}/",
+            type="LIKE"
+        )
+
+
+
+    except IntegrityError:
+        Like.objects.filter(
+            user=request.user,
+            article=article
+        ).delete()
+        liked=False 
+
+   
 
    
 
@@ -243,16 +258,25 @@ def add_comment(request, article_id):
 
     content = request.POST.get('content', '').strip()
 
-    if content:
+    if content and len(content)>2:
             Comment.objects.create(
                 user=request.user,
                 article=article,
                 content=content
             )
+
+
+            if article.user != request.user:
+                Notification.objects.create(
+                    user=article.user,
+                    message=f"{request.user.first_name or request.user.email} commented on your article",
+                    link=f"/client/article/{article.id}/",
+                    type="COMMENT"
+                )
             messages.success(request, "Comment added successfully.")
 
     else:
-        messages.error(request, "Comment cannot be empty.")
+        messages.error(request, "Comment must be at least 3 characters long.")
 
     return redirect('article-detail', id=article.id)
 
@@ -293,10 +317,10 @@ def edit_comment(request, comment_id):
 
     new_content = request.POST.get('content',"").strip()
 
-    if not new_content:
+    if not new_content or len(new_content)<3:
         return JsonResponse({
             "success": False,
-            "error": "Content cannot be empty"
+            "error": "Content must be at least 3 characters long"
         }, status=400)
     
     comment.content = new_content
@@ -318,19 +342,20 @@ def toggle_bookmark(request, article_id):
         return JsonResponse({"error": "Access denied."}, status=403)
     article = get_object_or_404(Article, id=article_id)
 
-    bookmark,created = Bookmark.objects.get_or_create(  
-        user=request.user,
-        article=article
-
-    )
-
-    if not created:
-        bookmark.delete()
-        bookmarked=False
-    else:
+    try:
+        Bookmark.objects.create(
+            user=request.user,
+            article=article
+        )
         bookmarked=True
 
-    
+    except IntegrityError:
+        Bookmark.objects.filter(
+            user=request.user,
+            article=article
+        ).delete()
+        bookmarked=False
+
 
     total = Bookmark.objects.filter(article=article).count()
 
@@ -340,6 +365,12 @@ def toggle_bookmark(request, article_id):
     })
 
  
+
+
+  
+
+    
+
 
     
    
@@ -519,7 +550,7 @@ def payment_success(request):
         
 
         try:
-            if float(amount_paid) != 4.99:
+            if  round(float(amount_paid), 2) != 4.99:
                 messages.error(request, "Invalid payment amount.")
                 return redirect('client-dashboard')
         except ValueError:
