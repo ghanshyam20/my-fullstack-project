@@ -185,26 +185,13 @@ AWS_S3_REGION_NAME = os.getenv("DO_SPACES_REGION")
 
 AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
 
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.cdn.digitaloceanspaces.com"
 
+#MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"
 
-AWS_QUERYSTRING_AUTH = False
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = True
 
-
-
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
-
-
-
-
-print("KEY:", AWS_ACCESS_KEY_ID)
-
-
-# for termp solution 
-AWS_DEFAULT_ACL ="public-read"
 AWS_S3_FILE_OVERWRITE = False
+AWS_LOCATION = "media"
 
-
-
-AWS_LOCATION="media"
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"
+MEDIA_URL = f"https://{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/{AWS_LOCATION}/"
