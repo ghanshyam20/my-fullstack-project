@@ -25,16 +25,22 @@
             {% for img in article.images.all %}
             <div class="img-box">
 
-                <img src="{% url 'protected-image' img.id %}"
-                 class="article-img clickable-img {% if not can_access and article.is_premium and forloop.counter > 2 %}blur-img{% endif %}"
-                 
-                 data-locked="{% if not can_access and article.is_premium and forloop.counter > 2 %}true{% endif %}">
+                {% if article.is_premium and forloop.counter > 2 %}
+        
+        <!-- lockd images  -->
+            <img src="{% url 'protected-image' img.id %}"
+                class="article-img clickable-img {% if not can_access %}blur-img{% endif %}"
+                data-locked="{% if not can_access %}true{% endif %}">
 
-                 {% if not can_access and article.is_premium and forloop.counter > 2 %}
-                    <div class="img-overlay">Premium</div>
-                 {% endif %}
+            {% if not can_access %}
+                <div class="img-overlay">Premium</div>
+            {% endif %}
 
-                
+            {% else %}
+            <img src="{{ img.image.url }}"
+                class="article-img clickable-img">
+            {% endif %}
+                    
 
             </div>
             {% endfor %}
