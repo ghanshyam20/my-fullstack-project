@@ -67,6 +67,7 @@ def client_dashboard(request):
     if is_writer_only(request):
         return redirect('writer-dashboard')
     query = request.GET.get('q', '').strip()
+    filter_type=request.GET.get('type')
 
     articles = Article.objects.select_related('user') \
         .prefetch_related('images', 'article_likes', 'article_bookmarks', 'article_views') \
@@ -76,8 +77,20 @@ def client_dashboard(request):
             total_views=Count('article_views', distinct=True)
     ).filter(is_published=True)
 
+
+    if filter_type =='free':
+        articles = articles.filter(is_premium=False)
+    elif filter_type == 'premium':
+        articles = articles.filter(is_premium=True)
+
     
    
+
+   
+
+  
+
+
 
     if query:
         terms = query.split()
@@ -97,8 +110,13 @@ def client_dashboard(request):
             )
         ).order_by('-relevance', '-date_posted')
 
+
+
     else:
         articles = articles.order_by('-date_posted')
+
+
+    
 
     return render(request, 'client/client-dashboard.html', {
         'articles': articles,
