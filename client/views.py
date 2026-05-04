@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from client.models import Article, Like ,Comment,Bookmark, Notification,Report
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from client.models import Subscription
 from django.db.models import Q, Case, When, IntegerField
 from client.models import ArticleView
@@ -193,7 +193,12 @@ def article_detail(request, id):
             can_access=False
 
        
-    
+    # to block blur images 
+    all_images=article.images.all()
+    if can_access:
+        visible_images=all_images
+    else:
+        visible_images=all_images[:2]
     
 
 
@@ -202,6 +207,7 @@ def article_detail(request, id):
         'comments': comments,
         'is_bookmarked': is_bookmarked,
         'can_access': can_access,
+        'visible_images': visible_images,
         'total_likes': total_likes,
         'total_bookmarks': total_bookmarks,
         'total_views': total_views,
@@ -737,3 +743,23 @@ def payment_success(request):
 def payment_cancel(request):
     messages.warning(request, "Payment cancelled.")
     return redirect('client-dashboard')
+
+
+
+
+@login_required
+def protected_image(request, image_id):
+
+    from writer.models import ArticleImage
+    image=get_object_or_404(ArticleImage, id=image_id)
+    subscription=getattr(request.user, 'subscription', None)
+
+
+
+    if image.article.is_premium:
+        if not subscription or not subscription.is_valid():
+            return HttpResponseForbidden("You need a premium subscription to view this image.",status=403)
+        
+
+        return redirect(image.image.url)
+       
