@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            document.getElementById("modalImage").src = img.dataset.src;
+            document.getElementById("modalImage").src = img.src;
             new bootstrap.Modal(document.getElementById("imageModal")).show();
         });
     });

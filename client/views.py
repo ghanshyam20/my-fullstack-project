@@ -16,6 +16,8 @@ from client.models import ArticleView
 from django.db import transaction
 from client.models import Payment
 
+from storages.backends.s3boto3 import S3Boto3Storage
+
 from django.db.models import Count 
 import logging
 logger = logging.getLogger(__name__)
@@ -761,5 +763,9 @@ def protected_image(request, image_id):
             return HttpResponseForbidden("You need a premium subscription to view this image.",status=403)
         
 
-    return redirect(image.image.url)
+    storage=S3Boto3Storage()
+    url=storage.url(image.image.name)
+        
+
+    return redirect(url)
        
