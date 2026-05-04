@@ -1,271 +1,320 @@
-InsightHub – Subscription-Based Content Platform
+<h1 align="center">InsightHub</h1>
+<p align="center">
+  Subscription-Based Content Platform
+</p>
 
-1. Project Overview
+<hr/>
 
-InsightHub is a full-stack web application designed to deliver technical content through a subscription-based model. The platform allows users to explore free content while restricting premium content behind a paid subscription.
+<h2>1. Project Overview</h2>
 
-The system simulates a real-world SaaS product where content creators (writers) publish articles and users consume content based on access levels.
+<p>
+InsightHub is a full-stack web application designed to deliver technical content through a subscription-based model.
+The platform allows users to explore free content while restricting premium content behind a paid subscription.
+</p>
 
-The platform supports:
+<p>
+The idea behind the system was to simulate a real-world SaaS product, where content creators (writers) publish articles,
+and users consume content based on access levels.
+</p>
 
-Secure user authentication with OTP verification
-Role-based access (client and writer)
-Premium subscription system
-Payment integration with PayPal
-Content management for writers
-GDPR-related privacy features
+<p><strong>Main capabilities include:</strong></p>
 
+<ul>
+  <li>Secure user authentication with OTP verification</li>
+  <li>Role-based access (client and writer)</li>
+  <li>Premium subscription system</li>
+  <li>Payment integration using PayPal</li>
+  <li>Content management for writers</li>
+  <li>GDPR-related privacy features</li>
+</ul>
 
-2. Purpose of the Project
+<hr/>
 
-The main purpose of this project is to demonstrate how a modern web application can be designed to:
+<h2>2. Purpose of the Project</h2>
 
-Monetize digital content
-Enforce access control securely
-Integrate third-party payment systems
-Maintain user data privacy and compliance
+<p>
+The purpose of this project was to understand how a modern web application can be structured to handle real-world requirements.
+</p>
 
-This project also reflects real-world backend engineering practices including authentication, database design, API integration, and deployment.
+<ul>
+  <li>Monetizing digital content through subscriptions</li>
+  <li>Implementing secure access control</li>
+  <li>Integrating third-party APIs (PayPal)</li>
+  <li>Managing user data responsibly</li>
+</ul>
 
-3. System Architecture
+<p>
+It also helped in understanding backend engineering concepts such as authentication flows, database design,
+API validation, and deployment pipelines.
+</p>
 
-The system follows the Django MVT (Model–View–Template) architecture.
+<hr/>
 
-Application Structure
+<h2>3. System Architecture</h2>
 
-The project is divided into three main applications:
+<p>The system follows Django's Model–View–Template (MVT) architecture.</p>
 
-account
-Handles authentication, OTP verification, user profile, GDPR features
-client
-Handles article browsing, interactions (like, comment, bookmark), subscriptions, payments
-writer
-Handles article creation, editing, and management
+<h3>Application Structure</h3>
 
+<ul>
+  <li><strong>account</strong> – authentication, OTP, profile, GDPR</li>
+  <li><strong>client</strong> – article browsing, interactions, subscriptions, payments</li>
+  <li><strong>writer</strong> – article creation and management</li>
+</ul>
 
+<h3>Request Flow</h3>
 
-Request Flow
-User sends request (browser)
-Django view processes logic
-Models interact with database
-Template renders response
+<ol>
+  <li>User sends request from browser</li>
+  <li>Django view processes logic</li>
+  <li>Models interact with database</li>
+  <li>Template renders response</li>
+</ol>
 
-This separation ensures maintainability and scalability.
+<p>
+This separation helped keep the system organized and easier to maintain.
+</p>
 
+<hr/>
 
-4. Core Features
-Authentication System
-Email-based login
-OTP verification for account activation
-Password reset with OTP
-Role-based redirection (writer vs client)
-Content System
-Writers can create, update, and delete articles
-Articles can be marked as free or premium
-Multiple images per article supported
-Subscription System
-One-to-one relationship between user and subscription
-Premium access controlled via backend validation
-Subscription expiry handling
-Payment Integration
-PayPal API (sandbox)
-Backend verification of transactions
-Duplicate payment prevention
-User Interaction
-Like system (toggle)
-Bookmark system
-Comment system (with replies)
-Report system
-Notification system
-5. Backend Logic Implementation
-Search Functionality
+<h2>4. Core Features</h2>
 
-The search system is implemented using Django ORM with dynamic query building.
+<h3>Authentication</h3>
+<ul>
+  <li>Email-based login</li>
+  <li>OTP verification during registration</li>
+  <li>Password reset using OTP</li>
+  <li>Role-based redirection</li>
+</ul>
 
-Input query is split into terms
-Each term is matched against:
-article title
-article content
-Results are ranked using conditional logic:
-Title matches have higher priority than content matches
+<h3>Content Management</h3>
+<ul>
+  <li>Writers can create, update, and delete articles</li>
+  <li>Articles can be free or premium</li>
+  <li>Multiple images per article supported</li>
+</ul>
 
-This improves search relevance without requiring external search engines.
+<h3>Subscription System</h3>
+<ul>
+  <li>One-to-one relation between user and subscription</li>
+  <li>Access controlled from backend</li>
+  <li>Expiry-based validation</li>
+</ul>
 
-Subscription and Access Control
+<h3>Payment</h3>
+<ul>
+  <li>PayPal integration (sandbox)</li>
+  <li>Backend verification before activation</li>
+  <li>Duplicate payment protection</li>
+</ul>
 
-Access to premium content is strictly controlled by backend logic.
+<h3>User Interaction</h3>
+<ul>
+  <li>Like / Bookmark system</li>
+  <li>Comment system (with replies)</li>
+  <li>Report functionality</li>
+  <li>Notification system</li>
+</ul>
 
-Each user has a subscription object, and access is validated using:
+<hr/>
 
-Subscription plan
-Active status
-Expiration date
+<h2>5. Backend Logic Implementation</h2>
 
-If conditions are not met, access is restricted.
+<h3>Search System</h3>
 
-Premium Content Protection
+<p>
+Search is implemented using Django ORM. The query is split into terms and matched against title and content.
+Title matches are given higher priority than content matches to improve relevance.
+</p>
 
-Premium content is protected at multiple levels:
+<h3>Access Control</h3>
 
-1. Backend Access Control
+<p>
+Premium access is strictly handled in backend logic. Even if someone tries to bypass frontend,
+the system checks subscription validity before returning content.
+</p>
 
-The system uses a boolean flag (can_access) to determine access.
+<h3>Premium Protection</h3>
 
-2. Media Protection
+<ul>
+  <li>Backend flag (<code>can_access</code>) controls visibility</li>
+  <li>Images are served through protected endpoint</li>
+</ul>
 
-Images are not directly exposed. Instead, they are served through a protected endpoint:
+<pre>
+/protected-image/&lt;id&gt;/
+</pre>
 
-/protected-image/<id>/
+<p>
+This was important because direct media access was a real issue during development.
+We fixed it by routing images through a secure view.
+</p>
 
-Unauthorized users receive a forbidden response.
+<h3>Payment Handling</h3>
 
-3. Frontend Restriction
-Only preview content is shown
-Limited number of images displayed
-Full content unlocked only after subscription
-Payment System
+<p>
+Payments are verified using PayPal API before activating subscriptions.
+We validate:
+</p>
 
-The payment flow is implemented using PayPal API and includes:
+<ul>
+  <li>Order ID</li>
+  <li>Status</li>
+  <li>Amount</li>
+  <li>Currency</li>
+</ul>
 
-Order creation
-Payment capture
-Validation of:
-order ID
-payment status
-amount
-currency
+<h3>Race Condition Handling</h3>
 
-Only verified payments activate subscriptions.
+<p>
+Initially, duplicate payments were being processed.  
+This was solved using database transactions and locking:
+</p>
 
-Race Condition Handling
+<pre>
+transaction.atomic()
+select_for_update()
+</pre>
 
-To prevent duplicate transactions, the system uses database-level locking:
+<p>
+This ensures only one payment is processed at a time.
+</p>
 
-Atomic transactions
-select_for_update() for payment validation
+<h3>Database Optimization</h3>
 
-This ensures consistency even under concurrent requests.
+<ul>
+  <li><code>select_related()</code> for joins</li>
+  <li><code>prefetch_related()</code> for reverse relations</li>
+  <li><code>annotate()</code> for counts</li>
+  <li>Indexes for faster queries</li>
+</ul>
 
-Database Optimization
+<hr/>
 
-The system uses several optimization techniques:
+<h2>6. Database Design</h2>
 
-select_related() for foreign key joins
-prefetch_related() for reverse relations
-annotate() for aggregated values (likes, views)
-Indexing for frequently queried fields
+<p>Main entities include:</p>
 
-These techniques improve performance and reduce database load.
+<ul>
+  <li>CustomUser</li>
+  <li>Article</li>
+  <li>Subscription</li>
+  <li>Payment</li>
+  <li>Comment / Like / Bookmark</li>
+</ul>
 
-6. Database Design
+<h3>Key Decisions</h3>
 
-The system includes the following key entities:
+<ul>
+  <li>OneToOne for Subscription → one user, one plan</li>
+  <li>Unique constraints → prevent duplicate likes/bookmarks</li>
+  <li>Indexes → improve performance</li>
+</ul>
 
-CustomUser (authentication)
-Article (content)
-ArticleImage (media)
-Subscription (access control)
-Payment (transactions)
-Comment (user interaction)
-Like, Bookmark (engagement)
-Notification (activity tracking)
-Design Decisions
-OneToOne (Subscription)
-Ensures each user has a single subscription
-Unique Constraints (Like, Bookmark)
-Prevent duplicate interactions
-Indexes
-Improve performance for search and filtering
-7. GDPR and Privacy Features
+<hr/>
 
-The system includes basic GDPR-compliant features:
+<h2>7. GDPR & Privacy</h2>
 
-Cookie Consent
-Cookie banner displayed on first visit
-User consent required before usage
-Data Protection
-Users can export personal data in JSON format
-Users can delete their account permanently
-Transparency
-Privacy Policy and Terms pages included
-Users are informed about:
-data usage
-email communication
-subscription handling
-Security
-Passwords are hashed
-OTP-based verification ensures secure onboarding
-8. Deployment
+<ul>
+  <li>Cookie consent banner implemented</li>
+  <li>User can export personal data (JSON)</li>
+  <li>User can delete account</li>
+  <li>Consent timestamp stored in database</li>
+</ul>
 
-The application is deployed using:
+<p>
+While building this, one challenge was making sure data deletion actually removes related records.
+This was handled using cascading deletes and controlled queries.
+</p>
 
-DigitalOcean (hosting)
-Gunicorn (application server)
-Docker (containerization)
-PostgreSQL (production database)
-DigitalOcean Spaces (media storage)
+<hr/>
 
-Static files are handled using Django's collectstatic process.
+<h2>8. Deployment</h2>
 
-9. CI/CD Pipeline
+<ul>
+  <li>DigitalOcean hosting</li>
+  <li>Gunicorn server</li>
+  <li>Docker container</li>
+  <li>PostgreSQL database</li>
+  <li>DigitalOcean Spaces for media</li>
+</ul>
 
-The project uses GitHub Actions for continuous integration.
+<p>
+Deployment issues included static files and media handling, which were solved using collectstatic and S3 configuration.
+</p>
 
-Pipeline includes:
+<hr/>
 
-Code checkout
-Dependency installation
-Django system checks
-Migration validation
-Linting (flake8)
-Security scanning (bandit)
+<h2>9. CI/CD Pipeline</h2>
 
-This ensures code quality and consistency before merging.
+<ul>
+  <li>GitHub Actions workflow</li>
+  <li>Django checks</li>
+  <li>Migration validation</li>
+  <li>Linting and security scan</li>
+</ul>
 
-10. Installation Guide
-Step 1: Clone Repository
+<p>
+This helped catch issues early before merging into main branch.
+</p>
+
+<hr/>
+
+<h2>10. Installation</h2>
+
+<pre>
 git clone https://github.com/ghanshyam20/my-fullstack-project.git
-Step 2: Setup Environment
+cd my-fullstack-project
+
 python -m venv venv
 source venv/bin/activate
-Step 3: Install Dependencies
+
 pip install -r requirements.txt
-Step 4: Run Migrations
+
 python manage.py migrate
-Step 5: Start Server
 python manage.py runserver
-11. Team Contribution
-Ghan Bhattarai
-Full backend development
-Payment system integration
-Authentication system
-Deployment and CI/CD
-Asish Chaurasia
-Project planning
-UI feedback
-Testing support
-Taranand Yadav
-Documentation
-Testing and validation
-12. Limitations
-Search system is basic (no advanced ranking engine)
-UI/UX can be further improved
-No recommendation system implemented
-Limited analytics features
-13. Reflection
+</pre>
 
-This project provided hands-on experience in building a real-world web application.
+<hr/>
 
-Key learnings include:
+<h2>11. Team Contribution</h2>
 
-Designing scalable backend systems
-Implementing secure authentication
-Handling payments and subscriptions
-Managing database performance
-Deploying production-ready applications
+<ul>
+  <li><strong>Ghan Bhattarai</strong> – full backend, payments, deployment</li>
+  <li><strong>Asish Chaurasia</strong> – planning, UI feedback, testing</li>
+  <li><strong>Taranand Yadav</strong> – documentation, testing</li>
+</ul>
 
-The most challenging part was ensuring secure premium content access and handling payment validation correctly.
+<hr/>
 
-14. Conclusion
+<h2>12. Challenges Faced</h2>
 
-InsightHub demonstrates a complete content subscription system with authentication, payment integration, and secure access control. The project reflects real-world engineering practices and provides a strong foundation for further development.
+<ul>
+  <li>Securing premium images → solved using protected endpoint</li>
+  <li>Duplicate payment issue → solved using transactions</li>
+  <li>Search performance → improved using ORM optimization</li>
+  <li>Media storage in production → solved using DigitalOcean Spaces</li>
+</ul>
+
+<hr/>
+
+<h2>13. Reflection</h2>
+
+<p>
+This project gave practical experience in building a real backend system.
+The most valuable learning was understanding how small logic mistakes (like payment validation or access control)
+can break the entire system if not handled properly.
+</p>
+
+<p>
+We also learned how to structure a project, manage code using Git workflows, and deploy a working production system.
+</p>
+
+<hr/>
+
+<h2>14. Conclusion</h2>
+
+<p>
+InsightHub demonstrates a complete subscription-based platform with authentication, payments, and secure content delivery.
+The system reflects real-world backend design and provides a solid base for future improvements.
+</p>
