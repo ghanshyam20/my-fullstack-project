@@ -761,5 +761,5 @@ def protected_image(request, image_id):
             return HttpResponseForbidden("You need a premium subscription to view this image.",status=403)
         
 
-        return redirect(image.image.url)
+    return redirect(image.image.url)
        
