@@ -25,13 +25,13 @@
   <div class="container">
 
   
-    <a class="navbar-brand fw-bold fs-3" href="/">InsightHub</a>
+    <a class="navbar-brand fw-semibold fs-4" href="/">InsightHub</a>
 
 
-    <div class="ms-auto d-flex align-items-center gap-2">
+    <div class="ms-auto d-flex align-items-center gap-3">
 
-    <a href="{% url 'about' %}" class="btn btn-outline-dark">About</a>
-    <a href="{% url 'contact' %}" class="btn btn-outline-dark">Contact</a>
+    <a href="{% url 'about' %}" class="nav-link-custom">About</a>
+    <a href="{% url 'contact' %}" class="nav-link-custom">Contact</a>
       {% block navbar_right %}
 
 {% if user.is_authenticated %}
