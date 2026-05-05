@@ -12,10 +12,10 @@
         <!-- left side  -->
         <div class="col-md-6">
 
-            <!-- for account details -->
-            <div class="card shadow-sm">
+            <!-- accoutn details  -->
+            <div class="card shadow-sm mb-3">
                 <div class="card-body">
-                    <h6>Account Details</h6>
+                    <h6 class="mb-3">Account Details</h6>
 
                     <form method="POST">
                         {% csrf_token %}
@@ -28,24 +28,46 @@
                 </div>
             </div>
 
-            <!-- for profile image and bio -->
-            <div class="card shadow-sm mt-3 text-center">
+            <!-- Profile  -->
+            <div class="card shadow-sm mb-3">
                 <div class="card-body">
+                    <h6 class="mb-3">Profile</h6>
 
-                    <h6>Profile</h6>
-
-                
-
-                    <form method="POST" >
+                    <form method="POST">
                         {% csrf_token %}
 
-                        
-
-                        <textarea name="bio" class="form-control mb-2"
-                            placeholder="Bio">{{ request.user.profile.bio }}</textarea>
+                        <textarea name="bio"
+                            class="form-control mb-3"
+                            rows="4"
+                            placeholder="Write something about yourself...">{{ request.user.profile.bio }}</textarea>
 
                         <button name="update_profile_extra" class="btn btn-dark w-100">
                             Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- data and privacy  -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+
+                    <h6 class="fw-bold text-danger">Data & Privacy</h6>
+
+                    <p class="text-muted small mb-3">
+                        Manage your personal data or delete your account permanently.
+                    </p>
+
+                    <a href="{% url 'export-data' %}" 
+                       class="btn btn-outline-primary w-100 mb-2">
+                        Download My Data
+                    </a>
+
+                    <form method="POST" action="{% url 'delete-account' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-danger w-100"
+                            onclick="return confirm('Are you sure? This cannot be undone.')">
+                            Delete My Account
                         </button>
                     </form>
 
@@ -55,90 +77,62 @@
         </div>
 
 
-       <!-- right side  -->
-<div class="col-md-6">
+        
+        <div class="col-md-6">
 
-    <!-- pasword  -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h6>Change Password</h6>
+            <!-- writer tools  -->
+            {% if request.user.is_writer %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Writer Tools</h6>
 
-            <form method="POST">
-                {% csrf_token %}
-                {{ PasswordForm|crispy }}
+                    <a href="{% url 'create-article' %}" class="btn btn-dark w-100 mb-2">
+                        Create Article
+                    </a>
 
-                <button name="change_password" class="btn btn-warning w-100 mt-2">
-                    Update Password
-                </button>
-            </form>
-        </div>
-    </div>
+                    <a href="{% url 'my-articles' %}" class="btn btn-outline-dark w-100">
+                        My Articles
+                    </a>
+                </div>
+            </div>
+            {% endif %}
 
-    <!-- client only  -->
-    {% if not request.user.is_writer %}
-    <div class="card shadow-sm mt-3 text-center">
-        <div class="card-body">
+            <!-- Password -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Change Password</h6>
 
-            <h6>Subscription</h6>
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ PasswordForm|crispy }}
 
-            {% if subscription %}
-                <p class="fw-bold">{{ subscription.plan }}</p>
-                <small>Expires: {{ subscription.expires_at }}</small>
-            {% else %}
-                <p>Free Plan</p>
-                <a href="#" class="btn btn-success w-100">
-                    Upgrade
-                </a>
+                        <button name="change_password" class="btn btn-warning w-100 mt-2">
+                            Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Subscription  -->
+            {% if not request.user.is_writer %}
+            <div class="card shadow-sm mb-3 text-center">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-2">Subscription</h6>
+
+                    {% if subscription %}
+                        <p class="fw-bold">{{ subscription.plan }}</p>
+                        <small>Expires: {{ subscription.expires_at }}</small>
+                    {% else %}
+                        <p>Free Plan</p>
+                        <a href="{% url 'create-order' %}" class="btn btn-success w-100">
+                            Upgrade
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
             {% endif %}
 
         </div>
-    </div>
-    {% endif %}
-
-    <!-- writer only  -->
-    {% if request.user.is_writer %}
-    <div class="card shadow-sm mt-3">
-        <div class="card-body">
-
-            <h6>Writer Tools</h6>
-
-            <a href="{% url 'create-article' %}" class="btn btn-dark w-100 mb-2">
-                Create Article
-            </a>
-
-            <a href="{% url 'my-articles' %}" class="btn btn-outline-dark w-100">
-                My Articles
-            </a>
-
-        </div>
-    </div>
-    {% endif %}
-    <div class="card shadow-sm mt-3">
-      <div class="card-body">
-
-        <h6>Data & Privacy</h6>
-        <p class="text-muted small mb-3">
-          You can download your data or permanantly delete your account.
-        </p>
-
-        <a href="{% url 'export-data' %}" class="btn btn-outline-primary w-100 mb-2">
-          Download My Data
-        </a>
-
-        <form method="POST" action="{% url 'delete-account' %}">
-          {% csrf_token %}
-          <button class="btn btn-danger w-100"
-            onclick="return confirm('Are you sure? This cannot be undone.')">
-            Delete My Account
-          </button>
-        </form>
-
-      </div>
-    </div>
-
-</div>
-
-</div>
 
     </div>
 
