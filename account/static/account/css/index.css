@@ -32,6 +32,7 @@ p {
 /* NAVBAR */
 .navbar {
   padding: 12px 0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
 }
 
 /* HERO */
@@ -79,6 +80,12 @@ section {
 .card-img-top {
   height: 220px;
   object-fit: cover;
+}
+
+img{
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* feature */
@@ -223,10 +230,32 @@ footer i:hover {
     padding-right: 18px;
   }
 
-  /* hero stack  */
-  .row {
-    flex-direction: column;
+  .row.align-items-center {
+    text-align: center;
   }
+
+
+  .row.align-items-center .col-lg-6 {
+    margin-bottom: 20px;
+  }
+
+
+.btn-lg {
+    width: 100%;
+    margin-bottom:10px;
+  }
+
+
+
+
+  .mt-4 a{
+    display: block;
+  }
+
+  /* hero stack  */
+  /* .row {
+    flex-direction: column;
+  } */
 
   .card-img-top {
     height: 200px;
@@ -236,15 +265,27 @@ footer i:hover {
     padding: 25px;
   }
 
-  .btn-lg {
-    width: 100%;
-    margin-bottom: 10px;
-  }
+ 
 
   .feature-box,
   .step-box {
     padding: 20px;
   }
+}
+
+
+.nav-link-custom{
+  text-decoration: none;
+  color:#333;
+  font-weight: 500;
+  padding: 8px 10px;
+  transition:0.2s;
+}
+
+
+.nav-link-custom:hover{
+  color:#000;
+ 
 }
 
 /*  for smal Small mobile  */
@@ -260,5 +301,14 @@ footer i:hover {
 
   .cta-box h3 {
     font-size: 1.4rem;
+  }
+}
+
+@media(max-width:576px){
+  .nav-link-custom,
+  .navbar .btn{
+    font-size:14px;
+    padding:6px 8px;
+
   }
 }
