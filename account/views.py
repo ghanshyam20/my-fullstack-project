@@ -11,7 +11,7 @@ from cms import settings
 from cms.settings import EMAIL_HOST_USER
 from writer.forms import UpdateUserForm
 from .forms import CreateUserForm, LoginForm
-from .models import EmailOtp, CustomUser,ContactMessage
+from .models import EmailOtp, CustomUser,ContactMessage, Profile
 from writer.models import Article
 from django.contrib.messages import get_messages
 from django.contrib.auth import update_session_auth_hash
@@ -131,6 +131,9 @@ def verify_otp(request, user_id):
             user.save()
             otp_obj.delete()
 
+
+            login(request, user)
+
             
 
             #  for writer =  second email + pending page
@@ -172,7 +175,7 @@ def verify_otp(request, user_id):
                     fail_silently=False,
                 )
 
-                return redirect('my-login')
+                return redirect('client-dashboard')
             
         else:
             messages.error(request, "Invalid or expired OTP. Please try again.")
@@ -336,6 +339,7 @@ def export_data(request):
 def profile_page(request):
 
     user = request.user
+    profile, created = Profile.objects.get_or_create(user=user)
 
     update_form = UpdateUserForm(instance=user)
     password_form = PasswordChangeForm(user=user)
@@ -372,7 +376,7 @@ def profile_page(request):
         # update  bio and image
         elif "update_profile_extra" in request.POST:
 
-            profile = user.profile
+          
 
             profile.bio = request.POST.get("bio")
 
@@ -387,6 +391,7 @@ def profile_page(request):
         'UpdateUserForm': update_form,
         'PasswordForm': password_form,
         'subscription': subscription,
+        'profile': profile,
     })
 
    
