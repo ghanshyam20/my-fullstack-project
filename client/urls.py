@@ -18,5 +18,6 @@ urlpatterns=[
     path('payment-success/', views.payment_success, name='payment-success'),
     path('payment-cancel/', views.payment_cancel, name='payment-cancel'),
     path('protected-image/<int:image_id>/', views.protected_image, name='protected-image'),
+    path('bookmarks/', views.bookmarked_articles, name='bookmarked-articles')
    
 ]
