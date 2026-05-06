@@ -1,7 +1,16 @@
+// toast helper
 function showToast(message) {
     const toastEl = document.getElementById("toast");
+    if (!toastEl) return;
+
     document.getElementById("toast-body").innerText = message;
-    new bootstrap.Toast(toastEl).show();
+
+    let toast = bootstrap.Toast.getInstance(toastEl);
+    if (!toast) {
+        toast = new bootstrap.Toast(toastEl);
+    }
+
+    toast.show();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const bookmarkBtn = document.getElementById("bookmark-btn");
     const reportBtn = document.getElementById("submit-report");
 
-    // image preview
+    //image preview 
     document.querySelectorAll(".clickable-img").forEach(img => {
         img.addEventListener("click", () => {
             if (img.dataset.locked) {
@@ -18,89 +27,123 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            document.getElementById("modalImage").src = img.src;
-            new bootstrap.Modal(document.getElementById("imageModal")).show();
+            const modalImg = document.getElementById("modalImage");
+            if (modalImg) {
+                modalImg.src = img.src;
+                new bootstrap.Modal(document.getElementById("imageModal")).show();
+            }
         });
     });
 
+    // like
+    likeBtn?.addEventListener("click", async () => {
+        try {
+            const res = await fetch(likeBtn.dataset.url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken()
+                }
+            });
 
+            const data = await res.json();
 
+            document.getElementById("like-count").innerText = data.total_likes;
 
-  likeBtn?.addEventListener("click", async () => {
-    const res = await fetch(likeBtn.dataset.url, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": getCSRFToken()
+            showToast(data.liked ? "Liked " : "Unliked");
+
+        } catch (err) {
+            showToast("Error liking");
         }
     });
 
-    const data = await res.json();
+    // bookmark
+    bookmarkBtn?.addEventListener("click", async () => {
+        try {
+            const res = await fetch(bookmarkBtn.dataset.url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken()
+                }
+            });
 
-    document.getElementById("like-count").innerText = data.total_likes;
-    document.getElementById("like-count-display").innerText = data.total_likes;
+            const data = await res.json();
 
-    showToast(data.liked ? "Liked" : "Unliked");
-});
+            document.getElementById("bookmark-count").innerText = data.total_bookmarks;
 
+            showToast(data.bookmarked ? "Saved" : "Removed");
 
+            // toggel 
+            if (data.bookmarked) {
+                bookmarkBtn.classList.add("btn-warning");
+                bookmarkBtn.classList.remove("btn-outline-warning");
+            } else {
+                bookmarkBtn.classList.remove("btn-warning");
+                bookmarkBtn.classList.add("btn-outline-warning");
+            }
 
- bookmarkBtn?.addEventListener("click", async () => {
-    const res = await fetch(bookmarkBtn.dataset.url, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": getCSRFToken()
+        } catch (err) {
+            showToast("Error saving");
         }
     });
 
-    const data = await res.json();
-    document.getElementById("bookmark-count").innerText = data.total_bookmarks;
-    document.getElementById("bookmark-count-display").innerText = data.total_bookmarks;
-    showToast(data.bookmarked ? "Saved" : "Removed");
-
-    // toggel boomark 
-    if (data.bookmarked) {
-        bookmarkBtn.classList.add("btn-warning");
-        bookmarkBtn.classList.remove("btn-outline-warning");
-    } else {
-        bookmarkBtn.classList.remove("btn-warning");
-        bookmarkBtn.classList.add("btn-outline-warning");
-    }
-});
-
-    // comment toggle
+    //comment toggle
     document.getElementById("comment-toggle")?.addEventListener("click", () => {
-        document.getElementById("comment-box").classList.toggle("d-none");
+        document.getElementById("comment-box")?.classList.toggle("d-none");
     });
 
-    // comment submit
-    document.getElementById("comment-form")?.addEventListener("submit", (e) => {
+    //comment 
+    document.getElementById("comment-form")?.addEventListener("submit", () => {
         showToast("Comment added");
     });
 
-    // report
+    // report 
     reportBtn?.addEventListener("click", async () => {
-        const reason = document.getElementById("report-reason").value;
 
-        await fetch(`/client/report/${ARTICLE_ID}/`, {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": getCSRFToken(),
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: `reason=${encodeURIComponent(reason)}`
-        });
+        const reasonEl = document.getElementById("report-reason");
+        const reason = reasonEl?.value.trim();
 
-        bootstrap.Modal.getInstance(document.getElementById("reportModal")).hide();
-        showToast("Report submitted");
+        if (!reason) {
+            showToast("Enter reason first");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/client/report/${ARTICLE_ID}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `reason=${encodeURIComponent(reason)}`
+            });
+
+            const data = await res.json();
+
+            if (data.status === "already_reported") {
+                showToast("Already reported");
+            } else {
+                showToast("Report submitted");
+            }
+
+            reasonEl.value = "";
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById("reportModal"));
+            if (modal) modal.hide();
+
+        } catch (err) {
+            showToast("Error reporting");
+        }
     });
 
 });
+
 
 // edit comment
 function editComment(id) {
     const textEl = document.getElementById(`comment-text-${id}`);
-    const newText = prompt("Edit comment", textEl.innerText);
+    if (!textEl) return;
 
+    const newText = prompt("Edit comment", textEl.innerText);
     if (!newText) return;
 
     fetch(`/client/edit-comment/${id}/`, {
@@ -120,7 +163,8 @@ function editComment(id) {
     });
 }
 
-// delete comment
+
+//  delete comment
 function deleteComment(id) {
     if (!confirm("Delete this comment?")) return;
 
@@ -132,10 +176,11 @@ function deleteComment(id) {
     })
     .then(() => {
         location.reload();
-        showToast("Deleted");
     });
 }
 
+
+//csrf token helper
 function getCSRFToken() {
     return document.cookie.split('; ')
         .find(row => row.startsWith('csrftoken'))

@@ -37,13 +37,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!banner) return;
 
-  // hide if already decided
+  // hide if already decide
   const saved = localStorage.getItem("cookie_consent");
   if (saved) {
     banner.style.display = "none";
   }
 
-  // if user accepts → analytics ON
+  // if user accepts , analytics on 
   acceptBtn.addEventListener("click", function () {
 
     const consentData = {
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Accepted:", consentData);
   });
 
-  // if user rejects → analytics OFF
+  // if user rejects  of 
   rejectBtn.addEventListener("click", function () {
 
     const consentData = {

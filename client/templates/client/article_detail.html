@@ -87,7 +87,7 @@
 
             </div>
 
-            <!-- STATS -->
+            <!-- status  -->
             <div class="mt-2 small text-muted d-flex gap-3 align-items-center">
                 <span><i class="bi bi-heart"></i> {{ total_likes }}</span>
                 <span><i class="bi bi-bookmark"></i> {{ total_bookmarks }}</span>
@@ -116,7 +116,7 @@
 
             <!-- comment box -->
             <div id="comment-box" class="d-none mt-4">
-                <form method="POST" action="{% url 'add-comment' article.id %}">
+                <form id="comment-form" method="POST" action="{% url 'add-comment' article.id %}">
                     {% csrf_token %}
                     <textarea name="content" class="form-control mb-2"
                         placeholder="Write your comment..." required></textarea>
