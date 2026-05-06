@@ -94,6 +94,45 @@
     gap: 8px;
 }
 
+
+/* article stats */
+.article-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 14px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    padding: 4px 8px;
+
+    border-radius: 8px;
+
+    background: #f5f7fb;
+    border: 1px solid #e9ecef;
+
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #495057;
+
+    transition: all 0.2s ease;
+}
+
+.stat-item i {
+    font-size: 0.85rem;
+}
+
+.stat-item:hover {
+    background: #edf2ff;
+    border-color: #c7d2fe;
+    color: #0d6efd;
+}
+
 @media (max-width: 768px) {
     .img-box {
         height: 160px;
