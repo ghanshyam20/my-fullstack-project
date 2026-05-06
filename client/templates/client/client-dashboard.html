@@ -131,17 +131,17 @@
                         {{ article.date_posted|date:"M d, Y" }}
                     </p>
 
-                    <div class="d-flex gap-3 small text-muted mb-2">
+                    <div class="article-stats">
 
-                        <span>
+                        <span class="stat-item">
                             <i class="bi bi-heart"></i> {{ article.total_likes }}
                         </span>
 
-                        <span>
+                        <span class="stat-item">
                             <i class="bi bi-bookmark"></i> {{ article.total_bookmarks }}
                         </span>
 
-                        <span>
+                        <span class="stat-item">
                             <i class="bi bi-eye"></i> {{ article.total_views }}
                         </span>
 
