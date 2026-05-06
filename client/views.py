@@ -768,4 +768,25 @@ def protected_image(request, image_id):
         
 
     return redirect(image.image.url)
+
+
+
+@login_required(login_url='my-login')
+def bookmarked_articles(request):
+
+    if is_writer_only(request):
+        return redirect('writer-dashboard')
+
+    bookmarks = Bookmark.objects.filter(
+        user=request.user
+    ).select_related(
+        'article',
+        'article__user'
+    ).prefetch_related(
+        'article__images'
+    ).order_by('-created_at')
+
+    return render(request, 'client/bookmark.html', {
+        'bookmarks': bookmarks
+    })
     

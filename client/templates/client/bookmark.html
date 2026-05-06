@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Bookmarks{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'client/css/client_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container dashboard-container py-4">
+
+    <div class="mb-4">
+        <h3 class="fw-bold">Saved Articles</h3>
+        <p class="text-muted">
+            Your saved articles buddy .
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        {% for bookmark in bookmarks %}
+
+        {% with article=bookmark.article %}
+
+        <div class="col-md-6 col-lg-4">
+
+            <div class="card article-card h-100">
+
+                {% if article.images.first %}
+                <div class="image-wrapper">
+                    <img src="{{ article.images.first.image.url }}"
+                         class="article-img">
+                </div>
+                {% endif %}
+
+                <div class="card-body d-flex flex-column">
+
+                    <div class="mb-2">
+                        {% if article.is_premium %}
+                            <span class="badge bg-warning text-dark">
+                                Premium
+                            </span>
+                        {% else %}
+                            <span class="badge bg-success">
+                                Free
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <h5 class="article-title">
+                        {{ article.title }}
+                    </h5>
+
+                    <p class="article-author">
+                        {{ article.user.first_name|default:article.user.email }}
+                    </p>
+
+                    <p class="article-date">
+                        {{ article.date_posted|date:"M d, Y" }}
+                    </p>
+
+                    <p class="article-text flex-grow-1">
+                        {{ article.content|striptags|truncatewords:20 }}
+                    </p>
+
+                    <a href="{% url 'article-detail' article.id %}"
+                       class="btn btn-outline-primary mt-auto">
+                        Read More →
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endwith %}
+
+        {% empty %}
+
+        <div class="text-center py-5">
+            <h5 class="text-muted">
+                No bookmarked articles yet
+            </h5>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

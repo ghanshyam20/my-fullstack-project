@@ -52,8 +52,8 @@
 <div class="bg-white border-bottom shadow-sm">
     <div class="container dashboard-container">
         <ul class="nav nav-pills py-2 gap-2 flex-wrap">
-            <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Bookmarks</a></li>
+            <li class="nav-item"><a class="nav-link active" href="{% url 'client-dashboard' %}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'bookmarked-articles' %}">Bookmarks</a></li>
             <li class="nav-item"><a class="nav-link" href="#">My Activity</a></li>
             <li class="nav-item"><a class="nav-link" href="#">Categories</a></li>
         </ul>
@@ -64,9 +64,12 @@
 
     <!-- header -->
     <div class="mb-4">
-        <h3 class="fw-bold">
-            Welcome back, {{ request.user.first_name|default:"User" }} 
-            <i class="bi bi-emoji-smile"></i>
+        <h3 class="fw-bold welcome-title">
+            Welcome back, {{ request.user.first_name|default:"User" }}
+
+            <span class="welcome-icon">
+                <i class="bi bi-patch-check-fill welcome-icon"></i>
+            </span>
         </h3>
 
         <p class="text-muted">Pick an article and keep learning.</p>
