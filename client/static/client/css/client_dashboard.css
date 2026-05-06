@@ -118,6 +118,28 @@ body {
     line-height: 1.5;
 }
 
+.article-text p {
+    margin-bottom: 10px;
+}
+
+.article-text strong {
+    font-weight: 600;
+}
+
+.article-text ul,
+.article-text ol {
+    padding-left: 18px;
+    margin-bottom: 10px;
+}
+
+.article-text h1,
+.article-text h2,
+.article-text h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
 /* badge */
 .badge {
     font-size: 0.7rem;

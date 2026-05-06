@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (editorEl) {
     quill = new Quill("#editor", {
       theme: "snow",
-      placeholder: "Write your article like a real tech blog...",
+      placeholder: "Write your Tech article here.",
       modules: {
         toolbar: [
           [{ header: [1, 2, 3, false] }],
@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ]
       }
     });
+    quill.root.setAttribute("spellcheck", "true");
+
   }
 
   if (form && hiddenContent && quill) {
