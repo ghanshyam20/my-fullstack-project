@@ -101,7 +101,7 @@ def my_articles(request):
         return redirect('client-dashboard')
    
 
-    articles = Article.objects.filter(user=request.user)
+    articles = Article.objects.filter(user=request.user).order_by('-date_posted')
 
     context = {'AllArticles': articles}
     return render(request, 'writer/my-articles.html', context)
